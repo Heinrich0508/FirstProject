@@ -259,6 +259,8 @@ public static int save = -1;
 
                         Toast.makeText(MainActivity.this, "Martin", Toast.LENGTH_SHORT).show();
                         Toast.makeText(MainActivity.this, "msg 2", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "Viktor", Toast.LENGTH_SHORT).show();
+
 
 
 
