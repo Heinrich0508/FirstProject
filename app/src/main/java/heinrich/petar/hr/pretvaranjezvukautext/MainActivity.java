@@ -16,6 +16,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -47,6 +48,7 @@ public static final String KEY_TAG_2 = "KEY_TAG_211";
 private static int oneItem = 0;
 public static int counter = 0;
 public static int counte2r = 0;
+public static int save = -1;
 
 
     ImageButton btn_plus;
@@ -65,6 +67,9 @@ public static int counte2r = 0;
     Activity context ;
     Context contextOut;
 
+    Parcelable state;
+    Bundle bundle;
+
 
     ArrayList<String> result = new ArrayList<String>();
     public static ArrayList<Products>listOFAllProducts = new ArrayList<Products>();
@@ -82,6 +87,9 @@ public static int counte2r = 0;
         mTextView = findViewById(R.id.textTv);
         mVoiceButton = findViewById(R.id.btnVoice);
         listItems = findViewById(R.id.listItems);
+
+
+
 
         SharedPreferences sharedPreferences = getSharedPreferences(KEY_TAG_1,Context.MODE_PRIVATE);
 
@@ -114,19 +122,9 @@ public static int counte2r = 0;
             for (Integer iObject : listOfcheckedItems) {
                  listItems.setItemChecked(iObject, true);
                     listItems.performItemClick(listItems,iObject,listItems.getItemIdAtPosition(iObject));
-                 listItems.setFocusable(true);
-                 listItems.getFocusedChild();
-                listItems.setSelector(new ColorDrawable(Color.GREEN));
-                 listItems.getCheckedItemIds();
-                 listItems.getCheckedItemPositions();
-                listItems.getItemAtPosition(iObject);
-                listItems.getCheckedItemCount();
-                listItems.setSelection(iObject);
-                listItems.addStatesFromChildren();
-                listItems.isActivated();
-                listItems.setActivated(true);
-                listItems.setSelected(true);
-                listItems.getSelectedView();
+
+
+
                 Log.d("iobjectSh: ", " " + iObject + " boolean " + listItems.isFocusable());
             }
 
@@ -134,6 +132,10 @@ public static int counte2r = 0;
             final CustomListView  customListView = new CustomListView(MainActivity.this,specialProductsInList,listOfcheckedItems);
             listItems.setAdapter(customListView);
             customListView.notifyDataSetChanged();
+
+
+
+
         }
 
         //button click
@@ -198,13 +200,25 @@ public static int counte2r = 0;
                     @Override
                     public void onClick(View v) {
                         //TODO - boja se mora postaviti na dodir gumba
+                        //TODO -ova metoda !!
+                        v.setBackgroundColor(Color.BLUE);
+                        view.setBackgroundColor(Color.BLUE);
+                       // parent.getChildAt(position).setBackgroundColor(Color.BLUE);
+                       // v.setBackgroundColor(Color.DKGRAY);
 
+                        if (save != -1 && save != position){
+                           // parent.getChildAt(save).setBackgroundColor(Color.BLACK);
 
+                           // v.setBackgroundColor(Color.BLUE);
+                        }
+
+                        save = position;
 
              /**
                * This part of code verify duplicated elements in list, if find them remove it.
                */
                         listOfcheckedItems.add(position);
+
                         counter = 0;
                         for (int i = 0; i < listOfcheckedItems.size(); i++) {
                             if (position == listOfcheckedItems.get(i)) {
@@ -237,23 +251,18 @@ public static int counte2r = 0;
 
                         refreshViewList();
 
-
-                        //TODO -ova metoda !!
-                        listItems.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-                         for (Integer iObject : listOfcheckedItems) {
-
-                                listItems.setItemChecked(iObject, true);
-                                Log.d("iobject: ", " " + iObject + " test001 "+listItems.getCheckedItemCount());
-                                listItems.setPressed(true);
-                                listItems.setSelected(true);
-                                listItems.setActivated(true);
-                                listItems.setFocusable(true);
-                                listItems.setSelection(listOfcheckedItems.size()-1);
-
-                         }
+                        for (int i = 0; i < listItems.getChildCount(); i++) {
+                            View listItem = listItems.getChildAt(i);
+                            listItem.setBackgroundColor(Color.BLUE);
+                        }
 
 
-                         Log.d("contextINsert "," "+getApplicationContext()+ " c");
+
+
+
+
+
+                        Log.d("contextINsert "," "+getApplicationContext()+ " c");
 
                     }
                 });
@@ -262,9 +271,8 @@ public static int counte2r = 0;
     }
 
 
-                  public static void getTheContext() {
-                  Context context = ContextClass.getAppContext();
-             }
+
+
 //TODO - PRIVREMENO
     public static StateListDrawable makeSelector(int color) {
         StateListDrawable res = new StateListDrawable();

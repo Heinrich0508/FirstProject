@@ -23,6 +23,7 @@ public class CustomListView extends ArrayAdapter<Products>  {
     private Activity context;
     private ArrayList<Products> productsList = new ArrayList<Products>();
     private ArrayList<Integer> listOfCheckedItems = new ArrayList<Integer>();
+    private ArrayList<View> viewList = new ArrayList<View>();
     Products listRemeber;
     int positionOfRedId;
     private boolean checked;
@@ -54,17 +55,25 @@ public class CustomListView extends ArrayAdapter<Products>  {
 
 
             LayoutInflater layoutInflater = context.getLayoutInflater();
-            r=layoutInflater.inflate(R.layout.listview_layout,null,true);
+            r=layoutInflater.inflate(R.layout.listview_layout,parent,false);
+
             viewHolder=new ViewHolder(r);
 
-            r.setEnabled(false);
 
-           // r.setActivated(true);
+
+
+
+
             r.setTag(viewHolder);
 
             for (int i=0;i<listOfCheckedItems.size();i++){
 
+
+
+
+                Log.d("gitTest","git "+i);
             }
+
 
             int po = getPosition(products2);
             Log.d("position","po "+po+ " position "+position);
@@ -80,9 +89,14 @@ public class CustomListView extends ArrayAdapter<Products>  {
                     r.getId();
 
 
+
+
                 }
 
                 Log.d("counterLog",""+listOfcheckedItems.size()+" IN REFRESH IN GET VIEW");
+                Log.d("gitTest","git ");
+
+
             }
 
 
@@ -105,6 +119,7 @@ public class CustomListView extends ArrayAdapter<Products>  {
 
 
           //listRemeber =(Products) r.getTag();
+
 
         return r;
     }
