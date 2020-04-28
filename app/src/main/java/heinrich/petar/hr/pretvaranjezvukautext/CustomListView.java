@@ -55,7 +55,7 @@ public class CustomListView extends ArrayAdapter<Products>  {
 
 
             LayoutInflater layoutInflater = context.getLayoutInflater();
-            r=layoutInflater.inflate(R.layout.listview_layout,parent,false);
+            r=layoutInflater.inflate(R.layout.listview_layout,null,true);
 
             viewHolder=new ViewHolder(r);
 
@@ -66,38 +66,11 @@ public class CustomListView extends ArrayAdapter<Products>  {
 
             r.setTag(viewHolder);
 
-            for (int i=0;i<listOfCheckedItems.size();i++){
-
-
-
-
-                Log.d("gitTest","git "+i);
-            }
 
 
             int po = getPosition(products2);
             Log.d("position","po "+po+ " position "+position);
-        /*r.setBackgroundColor(Color.RED);
-        if (po != position || po == 1){
-            r.setBackgroundColor(Color.YELLOW);
-        }*/
 
-           if (listOfCheckedItems != null) {
-
-                for (Integer check : listOfCheckedItems) {
-                    r.setId(check);
-                    r.getId();
-
-
-
-
-                }
-
-                Log.d("counterLog",""+listOfcheckedItems.size()+" IN REFRESH IN GET VIEW");
-                Log.d("gitTest","git ");
-
-
-            }
 
 
 
@@ -112,13 +85,9 @@ public class CustomListView extends ArrayAdapter<Products>  {
 
 
         Log.d("viewHolder",""+viewHolder.positionView+" == "+positionOfRedId);
-          if (position == viewHolder.positionView){
-             // r.setBackgroundColor(Color.GRAY);
-              Log.d("viewHolderIN",""+viewHolder.positionView+" VIEW HOLDER");
-          }
 
 
-          //listRemeber =(Products) r.getTag();
+
 
 
         return r;

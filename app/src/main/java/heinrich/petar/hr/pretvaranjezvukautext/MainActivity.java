@@ -157,7 +157,9 @@ public static int save = -1;
              final  Products products = specialProductsInList.get(position);
                 counter = position;
 
+                //tvShowNameOfProduct =(TextView)view.findViewById(R.id.tvShowNameOfProduct);
 
+               // tvShowNameOfProduct.setBackgroundResource(R.color.colorPrimary);
 
                 final AlertDialog.Builder aDialogBulder = new AlertDialog.Builder(MainActivity.this);
                 LayoutInflater layoutInflater = MainActivity.this.getLayoutInflater();
@@ -182,6 +184,7 @@ public static int save = -1;
                             listOfcheckedItems.remove(products.getId());
                         }
                         Toast.makeText(MainActivity.this, "Obrisano !!", Toast.LENGTH_SHORT).show();
+
                         SharedPreferences sharedPreferences = getSharedPreferences(KEY_TAG_1,Context.MODE_PRIVATE);
                         SharedPreferences.Editor prefsEditor = sharedPreferences.edit();
                         Gson gson = new Gson();
@@ -206,17 +209,18 @@ public static int save = -1;
                     public void onClick(View v) {
                         //TODO - boja se mora postaviti na dodir gumba
                         //TODO -ova metoda !!
-                        v.setBackgroundColor(Color.BLUE);
-                        view.setBackgroundColor(Color.BLUE);
+                        //v.setBackgroundColor(Color.BLUE);
+                        //view.setBackgroundColor(Color.BLUE);
                        // parent.getChildAt(position).setBackgroundColor(Color.BLUE);
                        // v.setBackgroundColor(Color.DKGRAY);
 
-                        if (save != -1 && save != position){
-                           // parent.getChildAt(save).setBackgroundColor(Color.BLACK);
+                        LayoutInflater layoutInflater = MainActivity.this.getLayoutInflater();
+                        final View view1 = layoutInflater.inflate(R.layout.listview_layout,null);
 
-                           // v.setBackgroundColor(Color.BLUE);
-                        }
 
+                        //tvShowNameOfProduct = (TextView) view1.findViewById(R.id.tvShowNameOfProduct);
+
+                       // tvShowNameOfProduct.setBackgroundResource(R.color.colorPrimary);
                         save = position;
 
              /**
@@ -256,10 +260,7 @@ public static int save = -1;
 
                         refreshViewList();
 
-                        for (int i = 0; i < listItems.getChildCount(); i++) {
-                            View listItem = listItems.getChildAt(i);
-                            listItem.setBackgroundColor(Color.BLUE);
-                        }
+
 
 
                         Toast.makeText(MainActivity.this, "Martin", Toast.LENGTH_SHORT).show();
@@ -468,7 +469,7 @@ public static int save = -1;
          startActivityForResult(intent,REQUEST_CODE_SPEECH_INPUT);
         }
         catch (Exception e){
-            Toast.makeText(this, ""+e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Nisam te čuo"+e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -497,6 +498,8 @@ public static int save = -1;
             }
         }
     }
+
+    //TODO - MARTIN
     private void readList(String myWord){
         for (Products products : listOFAllProducts){
             if (myWord.contains(products.getFullNameOfProduct()) || myWord.matches(products.getRootProduct())){
@@ -508,6 +511,7 @@ public static int save = -1;
                 listOfcheckedItems.clear();
             }
         }
+
         SharedPreferences sharedPreferences = getSharedPreferences(KEY_TAG_1,Context.MODE_PRIVATE);
         SharedPreferences.Editor prefsEditor = sharedPreferences.edit();
         Gson gson = new Gson();
