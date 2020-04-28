@@ -33,4 +33,10 @@
         android:scaleType="fitCenter"
         android:src="@drawable/ic_mic_pink" />
 
+    <TextView
+        android:id="@+id/testView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="TextView" />
+
 </LinearLayout>

@@ -50,7 +50,6 @@ public static int counter = 0;
 public static int counte2r = 0;
 public static int save = -1;
 
-
     ImageButton btn_plus;
     ImageButton btn_minus;
     ImageButton btn_remove;
@@ -59,7 +58,7 @@ public static int save = -1;
 
 
     // views
-    TextView mTextView;
+    TextView mTextView, testTextView;
     TextView tvShowNameOfProduct;
     ImageButton mVoiceButton;
     ListView listItems;
@@ -87,6 +86,9 @@ public static int save = -1;
         mTextView = findViewById(R.id.textTv);
         mVoiceButton = findViewById(R.id.btnVoice);
         listItems = findViewById(R.id.listItems);
+        //Martin
+        testTextView = findViewById(R.id.testView);
+
 
 
 
@@ -142,7 +144,8 @@ public static int save = -1;
         mVoiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                speak();
+                //speak();
+                martinTest("Danas kupi kiselo zelje i slatki krumpir");
             }
         });
         //refreshViewList();
@@ -470,13 +473,13 @@ public static int save = -1;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         switch (requestCode){
             case REQUEST_CODE_SPEECH_INPUT:{
                   result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                     if (resultCode == RESULT_OK && data != null) {
-                         myWord = result.get(0).toUpperCase();
-                         readList(myWord);
+                        // tu ubaci filter, kad filtrira spoji dvije rijeci u string i onda dodaj u myWord
+                       myWord = result.get(0).toUpperCase();
+                       //readList(myWord);
                 }
                 else{
                     Toast.makeText(this, "Nisam razumio", Toast.LENGTH_SHORT).show();
@@ -512,5 +515,22 @@ public static int save = -1;
 
 
     }
+
+    private void martinTest (String test){
+
+        Filter filter = new Filter();
+        String [] array = filter.stringToArray(test);
+//compareArray koristi petrovu metodu iz main, mislim da lista nije inicirana
+        //String testString = filter.compareArrayWithProductList(array);
+
+        StringBuilder builder = new StringBuilder();
+        for (int i =0; i < array.length;i++){
+            builder.append(i + " " + array[i]);
+            builder.append(", ");
+        }
+        testTextView.setText(builder.toString());
+        //testTextView.setText(testString);
+    }
+
 
 }
