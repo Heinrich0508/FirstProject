@@ -144,8 +144,10 @@ public static int save = -1;
         mVoiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //speak();
-                martinTest("Danas kupi kiselo zelje i slatki krumpir");
+                speak();
+                //martinTest("sir, kruh");
+
+
             }
         });
         //refreshViewList();
@@ -292,7 +294,7 @@ public static int save = -1;
     public static void setAllInList(){
         listOFAllProducts.add(new Products(0,".*KRUH.*","KRUH","količina: ",R.drawable.bread_min));
         listOFAllProducts.add(new Products(1,".*SIR.*","SIR","količina: ",R.drawable.cheese_min));
-        listOFAllProducts.add(new Products(2,".*SALAM.*","SALAMA","količina: ",R.drawable.salami_min));
+       listOFAllProducts.add(new Products(2,".*SALAM.*","SALAMA","količina: ",R.drawable.salami_min));
         listOFAllProducts.add(new Products(3,".*PIV.*","PIVA","količina: ",R.drawable.beer));
         listOFAllProducts.add(new Products(4,".*ČAJ.*","ČAJ","količina: ",R.drawable.caj_2));
         listOFAllProducts.add(new Products(5,".*ČOKOLAD.*","ČOKOLADA","količina: ",R.drawable.chocolate));
@@ -475,11 +477,19 @@ public static int save = -1;
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode){
             case REQUEST_CODE_SPEECH_INPUT:{
-                  result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    if (resultCode == RESULT_OK && data != null) {
-                        // tu ubaci filter, kad filtrira spoji dvije rijeci u string i onda dodaj u myWord
-                       myWord = result.get(0).toUpperCase();
-                       //readList(myWord);
+                result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                if (resultCode == RESULT_OK && data != null) {
+                     myWord = result.get(0).toUpperCase(); //my word je string
+
+                     //Martin START filter
+
+                    Filter filter = new Filter();
+                    String[] convertedString = filter.stringToArray(myWord);
+                    String test = filter.readListReturnAdjectives(convertedString);
+                    testTextView.setText(test);
+
+                    //Martin END
+                    readList(myWord);
                 }
                 else{
                     Toast.makeText(this, "Nisam razumio", Toast.LENGTH_SHORT).show();
@@ -490,6 +500,7 @@ public static int save = -1;
     private void readList(String myWord){
         for (Products products : listOFAllProducts){
             if (myWord.contains(products.getFullNameOfProduct()) || myWord.matches(products.getRootProduct())){
+                //String potentialAdjective =
                 specialProductsInList.add(products);
             }
             if (myWord.equals("OBRIŠI SVE")){
@@ -515,21 +526,20 @@ public static int save = -1;
 
 
     }
-
+////martin test
     private void martinTest (String test){
-
-        Filter filter = new Filter();
-        String [] array = filter.stringToArray(test);
-//compareArray koristi petrovu metodu iz main, mislim da lista nije inicirana
-        //String testString = filter.compareArrayWithProductList(array);
-
         StringBuilder builder = new StringBuilder();
+        Filter filter = new Filter();
+
+        String [] array = filter.stringToArray(test);
+        String testString = filter.compareArrayWithProductList(array);
+
         for (int i =0; i < array.length;i++){
-            builder.append(i + " " + array[i]);
+            builder.append(testString);
             builder.append(", ");
         }
+        //testTextView.setText(builder.toString());
         testTextView.setText(builder.toString());
-        //testTextView.setText(testString);
     }
 
 
