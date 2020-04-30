@@ -532,10 +532,9 @@ public static int save = -1;
         Filter filter = new Filter();
 
         String [] array = filter.stringToArray(test);
-        String testString = filter.compareArrayWithProductList(array);
 
         for (int i =0; i < array.length;i++){
-            builder.append(testString);
+            builder.append("testString");
             builder.append(", ");
         }
         //testTextView.setText(builder.toString());

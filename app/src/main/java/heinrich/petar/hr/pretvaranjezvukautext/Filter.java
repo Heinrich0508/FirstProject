@@ -12,38 +12,28 @@ public class Filter extends MainActivity {
         return array;
     }
     // 2 nadi korijene i njihove pozicije u arrayu
+    //
     public String readListReturnAdjectives(String[]convertedStringToArray){
         String adjective = "-1";
         String productNameToCompare = null;
+        String productFromArray=null;
 
-        for (int i=0; i<convertedStringToArray.length;i++){
-            if (convertedStringToArray[i].equals("VINO")){
-                return convertedStringToArray[i-1];
+       for (int i=0; i<convertedStringToArray.length; i++){
+            productNameToCompare = convertedStringToArray[i];
+            for (int y=0;y<MainActivity.listOFAllProducts.size();y++){
+                if (productNameToCompare.contains(MainActivity.listOFAllProducts.get(y).getFullNameOfProduct()) || productNameToCompare.matches(MainActivity.listOFAllProducts.get(y).getRootProduct())){
+                    productNameToCompare = convertedStringToArray[i];
+                }
             }
         }
 
-        return adjective;
-    }
+        for (int i=0; i<convertedStringToArray.length;i++){
 
-
-    //Proba
-    public String compareArrayWithProductList (String[] array){
-        String productName = null;
-        String returnProduct = null;
-        int position = 0;
-            for(int i=0; i<array.length -1; i++) {
-                String toCompare = array[i].toUpperCase();
-                for (int y=0; y < listOFAllProducts.size(); y++) {
-                    productName = listOFAllProducts.get(y).getFullNameOfProduct();
-                    if (toCompare.contains(productName)) {
-                        position = i;
-                        returnProduct = productName;//dodat na listu
-                    }
-                }
+            if (convertedStringToArray[i].contains(productNameToCompare) || convertedStringToArray[i].matches(productNameToCompare)){
+                return convertedStringToArray[i-1];
             }
-
-
-        return position + returnProduct;
+        }
+        return adjective;
     }
     // 3 izlistaj rijeci koje se nalaze poziciju prije korijena
 
