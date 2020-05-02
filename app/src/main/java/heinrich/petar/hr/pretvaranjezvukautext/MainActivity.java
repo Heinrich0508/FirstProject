@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -25,6 +26,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Checkable;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,22 +42,21 @@ import static android.widget.AbsListView.CHOICE_MODE_NONE;
 public class MainActivity extends AppCompatActivity {
 
 
-//microfon code
-public static final int REQUEST_CODE_SPEECH_INPUT = 1000;
+    //microfon code
+    public static final int REQUEST_CODE_SPEECH_INPUT = 1000;
 
-//shared preferences key
-public static final String KEY_TAG_1 = "KEY_TAG_808";
-public static final String KEY_TAG_2 = "KEY_TAG_211";
-private static int oneItem = 0;
-public static int counter = 0;
-public static int counte2r = 0;
-public static int save = -1;
+    //shared preferences key enter tag
+    public static final String KEY_TAG_1 = "KEY_TAG_808";
+
+    private static int oneItem = 0;
+    public static int counter = 0;
+    public static int counte2r = 0;
+    public static int save = -1;
 
     ImageButton btn_plus;
     ImageButton btn_minus;
     ImageButton btn_remove;
     ImageButton btn_checkIn;
-
 
 
     // views
@@ -63,17 +65,24 @@ public static int save = -1;
     ImageButton mVoiceButton;
     ListView listItems;
     String myWord = null;
-    Activity context ;
+    Activity context;
     Context contextOut;
 
     Parcelable state;
     Bundle bundle;
 
 
+    //LOG TAGS
+    private static final String TAG1 = "TAG1 ";
+
+
     ArrayList<String> result = new ArrayList<String>();
-    public static ArrayList<Products>listOFAllProducts = new ArrayList<Products>();
-    public static ArrayList<Products>specialProductsInList = new ArrayList<Products>();
-    public static ArrayList<Integer>listOfcheckedItems = new ArrayList<Integer>();
+    public static ArrayList<Products> listOFAllProducts = new ArrayList<Products>();
+    public static ArrayList<Products> specialProductsInList = new ArrayList<Products>();
+
+
+    //TODO - LISTA ZA POKUPIT IDIJEVE
+    public static ArrayList<Integer> idList = new ArrayList<Integer>();
 
 
 
@@ -89,65 +98,25 @@ public static int save = -1;
         //Martin
         testTextView = findViewById(R.id.testView);
 
+        sharedPrfesMenager();
 
 
 
-
-        SharedPreferences sharedPreferences = getSharedPreferences(KEY_TAG_1,Context.MODE_PRIVATE);
-
-
-
-        if (sharedPreferences.contains(KEY_TAG_2)) {
-
-
-            Gson gson = new Gson();
-            String json = sharedPreferences.getString("MyObject", "");
-            String json2 = sharedPreferences.getString("MyObject3", "");
-          //  String json3 = sharedPreferences.getString("MyObject4", "");
-            Type type = new TypeToken<ArrayList<Products>>() {}.getType();
-            Type type2 = new TypeToken<ArrayList<Integer>>() {}.getType();
-          //  Type type3 = new TypeToken<ArrayList<ListView>>() {}.getType();
-            specialProductsInList =  gson.fromJson(json, type);
-            listOfcheckedItems = gson.fromJson(json2,type2);
-          //  listItems = gson.fromJson(json3,type3);
             if (specialProductsInList == null){
                 specialProductsInList =  new ArrayList<Products>();
             }
-            if (listOfcheckedItems == null){
-                listOfcheckedItems = new ArrayList<>();
-            }
-            Log.d("counterLog",""+listOfcheckedItems.size()+" size IN ONCREATE"); //full
 
             refreshViewList();
 
 
-            for (Integer iObject : listOfcheckedItems) {
-                 listItems.setItemChecked(iObject, true);
-                    listItems.performItemClick(listItems,iObject,listItems.getItemIdAtPosition(iObject));
 
-
-
-                Log.d("iobjectSh: ", " " + iObject + " boolean " + listItems.isFocusable());
-            }
-
-            Log.d("contextINa"," ");
-            final CustomListView  customListView = new CustomListView(MainActivity.this,specialProductsInList,listOfcheckedItems);
-            listItems.setAdapter(customListView);
-            customListView.notifyDataSetChanged();
-
-
-
-
-        }
 
         //button click
         mVoiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 speak();
-                //martinTest("sir, kruh");
-
-
+                        //martinTest("sir, kruh");
             }
         });
         //refreshViewList();
@@ -157,12 +126,10 @@ public static int save = -1;
              final  Products products = specialProductsInList.get(position);
                 counter = position;
 
-                //tvShowNameOfProduct =(TextView)view.findViewById(R.id.tvShowNameOfProduct);
 
-               // tvShowNameOfProduct.setBackgroundResource(R.color.colorPrimary);
 
                 final AlertDialog.Builder aDialogBulder = new AlertDialog.Builder(MainActivity.this);
-                LayoutInflater layoutInflater = MainActivity.this.getLayoutInflater();
+                final LayoutInflater layoutInflater = MainActivity.this.getLayoutInflater();
                 final View dialogView = layoutInflater.inflate(R.layout.dialog_layout,null);
                 btn_plus = (ImageButton) dialogView.findViewById(R.id.btn_plus);
                 btn_minus = (ImageButton)dialogView.findViewById(R.id.btn_minus);
@@ -180,20 +147,20 @@ public static int save = -1;
                     @Override
                     public void onClick(View v) {
                         specialProductsInList.remove(counter);
-                        if (listOfcheckedItems!=null){
-                            listOfcheckedItems.remove(products.getId());
-                        }
+
                         Toast.makeText(MainActivity.this, "Obrisano !!", Toast.LENGTH_SHORT).show();
 
                         SharedPreferences sharedPreferences = getSharedPreferences(KEY_TAG_1,Context.MODE_PRIVATE);
                         SharedPreferences.Editor prefsEditor = sharedPreferences.edit();
                         Gson gson = new Gson();
-                        String json = gson.toJson(specialProductsInList);
-                        String json2 = gson.toJson(listOfcheckedItems);
-                       // String json3 = gson.toJson(listItems);
-                        prefsEditor.putString("MyObject", json);
-                        prefsEditor.putString("MyObject3", json2);
-                       // prefsEditor.putString("MyObject4", json3);
+
+                        String jsonRemovedItems = gson.toJson(specialProductsInList);
+                        String jsonAddDeletedItems = gson.toJson(specialProductsInList);
+                        String jsonChekedItems = gson.toJson(specialProductsInList);
+                        prefsEditor.putString("MyObject", jsonRemovedItems);
+                        prefsEditor.putString("MyObject2", jsonAddDeletedItems);
+                        prefsEditor.putString("MyObject5", jsonChekedItems);
+
                         prefsEditor.apply();
                         alertDialog.dismiss();
                         refreshViewList();
@@ -207,70 +174,68 @@ public static int save = -1;
                 btn_checkIn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        //TODO - boja se mora postaviti na dodir gumba
-                        //TODO -ova metoda !!
-                        //v.setBackgroundColor(Color.BLUE);
-                        //view.setBackgroundColor(Color.BLUE);
-                       // parent.getChildAt(position).setBackgroundColor(Color.BLUE);
-                       // v.setBackgroundColor(Color.DKGRAY);
-
-                        LayoutInflater layoutInflater = MainActivity.this.getLayoutInflater();
-                        final View view1 = layoutInflater.inflate(R.layout.listview_layout,null);
 
 
-                        //tvShowNameOfProduct = (TextView) view1.findViewById(R.id.tvShowNameOfProduct);
 
-                       // tvShowNameOfProduct.setBackgroundResource(R.color.colorPrimary);
-                        save = position;
-
-             /**
-               * This part of code verify duplicated elements in list, if find them remove it.
-               */
-                        listOfcheckedItems.add(position);
-
-                        counter = 0;
-                        for (int i = 0; i < listOfcheckedItems.size(); i++) {
-                            if (position == listOfcheckedItems.get(i)) {
-
-                               oneItem++; // 1 banane , kivi 2
-                               if (position == listOfcheckedItems.get(i) && oneItem>1) {
-                                   Log.d("inFormation", "" + listOfcheckedItems.get(i) + " zbroj: " + oneItem + " size: " + listOfcheckedItems.size());
-                                   listOfcheckedItems.remove(listOfcheckedItems.get(i));
-                                   oneItem = 0;
-                               }
+                        //TODO -DODAJEM NOVI KOD
+                        //TODO POKUSAT CU DOBIT POZICIJU OD ODABRANOG ITEMA
+                        int itemPosition = position;
+                        //TODO TU POZICIU STAVITI NA ZDANJE MJESTO U LISTI
+                        Products productItem = null;
+                        Integer saveItemID = specialProductsInList.get(itemPosition).getId();
+                        //todo - mičem ga kada sam ga odabrao
+                        specialProductsInList.remove(itemPosition);
+                        Log.d(TAG1,"id "+saveItemID);
+                        for (Products p:listOFAllProducts){
+                            if (p.getId().equals(saveItemID)){
+                                idList.add(saveItemID);
+                                productItem = p;
+                                break;
                             }
                         }
-                        oneItem = 0;
-                        Log.d("counterLog", "" + listOfcheckedItems.size() + " BEFORE");
+                        //todo - stavljam ga ponovno na kraj
+                        specialProductsInList.add(productItem);
+                        //TODO -DODAJEM MU STATUS KUPLJENO
 
 
+                       // String lastItemNameOfProduct = specialProductsInList.get(specialProductsInList.size()-1).getFullNameOfProduct();
+                        //specialProductsInList.get(specialProductsInList.size()-1).setFullNameOfProduct("");
+                       // specialProductsInList.get(specialProductsInList.size()-1).setCrossedFullNameOfProduct(lastItemNameOfProduct);
+
+                        specialProductsInList.get(specialProductsInList.size()-1).setQuantity("20");
+                        specialProductsInList.get(specialProductsInList.size()-1).setImageCheckedItem(R.drawable.check_min);
+                        specialProductsInList.get(specialProductsInList.size()-1).setPriceOfProduct("150");
+
+                        Log.d(TAG1,"priceofProduct "+ specialProductsInList.get(specialProductsInList.size()-1).getPriceOfProduct());
+
+
+
+
+                        //todo - treba napravit da se btn_checkin makne kada se jednom stisne
 
 
                         SharedPreferences sharedPreferences = getSharedPreferences(KEY_TAG_1, Context.MODE_PRIVATE);
                         SharedPreferences.Editor prefsEditor = sharedPreferences.edit();
                         Gson gson = new Gson();
-                        String json = gson.toJson(listOfcheckedItems);
-                        prefsEditor.putString("MyObject3", json);
+
+                        String jsonRemovedItems = gson.toJson(specialProductsInList);
+                        String jsonAddDeletedItems = gson.toJson(specialProductsInList);
+                        String jsonChekedItems = gson.toJson(specialProductsInList);
+                        prefsEditor.putString("MyObject", jsonRemovedItems);
+                        prefsEditor.putString("MyObject2", jsonAddDeletedItems);
+                        prefsEditor.putString("MyObject5", jsonChekedItems);
+
                         prefsEditor.apply();
-                        Log.d("counterLog", "" + listOfcheckedItems.size() + " AFTER");
+                        Log.d("counterLog", "" + specialProductsInList.get(specialProductsInList.size()-1) + " AFTER");
                         alertDialog.dismiss();
-
-
-
-
                         refreshViewList();
 
-
-
-
-                        Toast.makeText(MainActivity.this, "Martin", Toast.LENGTH_SHORT).show();
-                        Toast.makeText(MainActivity.this, "msg 2", Toast.LENGTH_SHORT).show();
-                        Toast.makeText(MainActivity.this, "Viktor", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG1,"priceofProduct 2 "+ specialProductsInList.get(specialProductsInList.size()-1).getPriceOfProduct());
 
 
 
 
-                        Log.d("contextINsert "," "+getApplicationContext()+ " c");
+
 
                     }
                 });
@@ -279,32 +244,39 @@ public static int save = -1;
     }
 
 
+    //todo - metoda upravlja sa shared preferencima
+    private void sharedPrfesMenager() {
+        Gson gson = new Gson();
+        Type type = new TypeToken<ArrayList<Products>>() { }.getType();
+        SharedPreferences sharedPreferences = getSharedPreferences(KEY_TAG_1, Context.MODE_PRIVATE);
 
+        String jsonRemovedItems = sharedPreferences.getString("MyObject", "");
+        specialProductsInList = gson.fromJson(jsonRemovedItems, type);
 
-//TODO - PRIVREMENO
-    public static StateListDrawable makeSelector(int color) {
-        StateListDrawable res = new StateListDrawable();
-        res.setExitFadeDuration(400);
-        res.setAlpha(45);
-        res.addState(new int[]{android.R.attr.state_pressed}, new ColorDrawable(color));
-        res.addState(new int[]{}, new ColorDrawable(Color.TRANSPARENT));
-        return res;
+        String jsonSelectedItem = sharedPreferences.getString("MyObject2", "");
+        specialProductsInList = gson.fromJson(jsonSelectedItem, type);
+
+        String addDeletAllProductsJson = sharedPreferences.getString("MyObject5", "");
+        specialProductsInList = gson.fromJson(addDeletAllProductsJson, type);
     }
+
+
 
     //add all to list
     public static void setAllInList(){
-        listOFAllProducts.add(new Products(0,".*KRUH.*","KRUH","količina: ",R.drawable.bread_min));
-        listOFAllProducts.add(new Products(1,".*SIR.*","SIR","količina: ",R.drawable.cheese_min));
-       listOFAllProducts.add(new Products(2,".*SALAM.*","SALAMA","količina: ",R.drawable.salami_min));
-        listOFAllProducts.add(new Products(3,".*PIV.*","PIVA","količina: ",R.drawable.beer));
-        listOFAllProducts.add(new Products(4,".*ČAJ.*","ČAJ","količina: ",R.drawable.caj_2));
-        listOFAllProducts.add(new Products(5,".*ČOKOLAD.*","ČOKOLADA","količina: ",R.drawable.chocolate));
-        listOFAllProducts.add(new Products(6,".*VIN.*","VINO","količina: ",R.drawable.vino_2));
-        listOFAllProducts.add(new Products(6,".*ANANAS.*","ANANAS","količina: ",R.drawable.penaple));
-        listOFAllProducts.add(new Products(7,".*GROŽĐ.*","GROŽĐE","količina: ",R.drawable.grozd));
-        listOFAllProducts.add(new Products(8,".*KAV.*","KAVA","količina: ",R.drawable.cofee_cup));
-        listOFAllProducts.add(new Products(9,".*KRUMPIR.*","KRUMPIR","količina: ",R.drawable.potato));
-        listOFAllProducts.add(new Products(10,".*NARANČ.*","NARANČA","količina: ",R.drawable.orange));
+
+        listOFAllProducts.add(new Products(0,".*KRUH.*","KRUH","",R.drawable.bread_min,"","",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(1,".*SIR.*","SIR","",R.drawable.cheese_min,"","",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(2,".*SALAM.*","SALAMA","",R.drawable.salami_min,"","",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(3,".*PIV.*","PIVA","",R.drawable.beer,"","",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(4,".*ČAJ.*","ČAJ","",R.drawable.caj_2,"","",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(5,".*ČOKOLAD.*","ČOKOLADA","",R.drawable.chocolate,"","",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(6,".*VIN.*","VINO","",R.drawable.vino_2,"","",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(6,".*ANANAS.*","ANANAS","",R.drawable.penaple,"","",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(7,".*GROŽĐ.*","GROŽĐE","",R.drawable.grozd,"","",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(8,".*KAV.*","KAVA","",R.drawable.cofee_cup,"","",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(9,".*KRUMPIR.*","KRUMPIR","",R.drawable.potato,"","",R.drawable.white_background_min));
+        /*listOFAllProducts.add(new Products(10,".*NARANČ.*","NARANČA","količina: ",R.drawable.orange));
         listOFAllProducts.add(new Products(11,".*SOL.*","SOL","količina: ",R.drawable.sol_2));
         listOFAllProducts.add(new Products(12,".*PEKMEZ.*","PEKMEZ","količina: ",R.drawable.jam));
         listOFAllProducts.add(new Products(13,".*JAGOD.*","JAGODE","količina: ",R.drawable.jagoda));
@@ -436,15 +408,15 @@ public static int save = -1;
         listOFAllProducts.add(new Products(139,".*SUNČ.* NAOČ.*","SUNČANE NAOČALE","količina: ",R.drawable.fashion_min));
         listOFAllProducts.add(new Products(140,".*TEPIH.*","TEPIH","količina: ",R.drawable.carpet_min));
         listOFAllProducts.add(new Products(141,".*ŽARULJ.*","ŽARULJA","količina: ",R.drawable.idea_min));
-        listOFAllProducts.add(new Products(142,".*KART.*","KARTE","količina: ",R.drawable.casino_min));
+        listOFAllProducts.add(new Products(142,".*KART.*","KARTE","količina: ",R.drawable.casino_min));*/
     }
 
         private void refreshViewList(){
-        final CustomListView  customListView = new CustomListView(MainActivity.this,specialProductsInList,listOfcheckedItems);
+        final CustomListView  customListView = new CustomListView(MainActivity.this,specialProductsInList,idList);
         listItems.setAdapter(customListView);
         customListView.notifyDataSetChanged();
 
-            Log.d("counterLog",""+listOfcheckedItems.size()+" IN REFRESH");
+
     }
 
 
@@ -466,9 +438,13 @@ public static int save = -1;
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT,"Šta ćeš danas kupit?");
         //start intent
         try {
+            Log.d("tryBlok: ","da");
          startActivityForResult(intent,REQUEST_CODE_SPEECH_INPUT);
         }
         catch (Exception e){
+
+            // todo PETAR NE KUZIM KAD SE IZVRSAVA OVAJ EXEPTION NIKAK DA GA HANDLA
+            Log.d("tryBlok: ","ne");
             Toast.makeText(this, "Nisam te čuo"+e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
@@ -478,11 +454,13 @@ public static int save = -1;
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode){
             case REQUEST_CODE_SPEECH_INPUT:{
+
+                if (data !=null) {
                 result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                 if (resultCode == RESULT_OK && data != null) {
-                     myWord = result.get(0).toUpperCase(); //my word je string
+                    myWord = result.get(0).toUpperCase(); //my word je string
 
-                     //Martin START filter
+                    //Martin START filter
 
                     Filter filter = new Filter();
                     String[] convertedString = filter.stringToArray(myWord);
@@ -492,7 +470,10 @@ public static int save = -1;
                     //Martin END
                     readList(myWord);
                 }
-                else{
+
+
+                }
+                else {
                     Toast.makeText(this, "Nisam razumio", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -508,18 +489,21 @@ public static int save = -1;
             }
             if (myWord.equals("OBRIŠI SVE")){
                 specialProductsInList.clear();
-                listOfcheckedItems.clear();
+
             }
         }
 
         SharedPreferences sharedPreferences = getSharedPreferences(KEY_TAG_1,Context.MODE_PRIVATE);
         SharedPreferences.Editor prefsEditor = sharedPreferences.edit();
         Gson gson = new Gson();
-        String json = gson.toJson(specialProductsInList);
-        String json2 = gson.toJson(listOfcheckedItems);
-        prefsEditor.putString("MyObject", json);
-        prefsEditor.putString("MyObject3", json2);
-        prefsEditor.apply();
+
+        String jsonRemovedItems = gson.toJson(specialProductsInList);
+        String jsonAddDeletedItems = gson.toJson(specialProductsInList);
+        String jsonChekedItems = gson.toJson(specialProductsInList);
+        prefsEditor.putString("MyObject", jsonRemovedItems);
+        prefsEditor.putString("MyObject2", jsonAddDeletedItems);
+        prefsEditor.putString("MyObject5", jsonChekedItems);
+
         prefsEditor.apply();
         refreshViewList();
     }
@@ -541,7 +525,9 @@ public static int save = -1;
             builder.append("testString");
             builder.append(", ");
         }
+
         //testTextView.setText(builder.toString());
+
         testTextView.setText(builder.toString());
     }
 

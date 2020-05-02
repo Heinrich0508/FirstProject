@@ -14,9 +14,18 @@
         <ImageView
             android:id="@+id/imViewOfProduct"
             android:layout_width="70dp"
-            android:layout_height="70dp"
+            android:layout_height="83dp" />
 
-            />
+        <ImageView
+            android:id="@+id/imViewCheck"
+            android:layout_width="76dp"
+            android:layout_height="69dp"
+            android:layout_alignBottom="@+id/tvQuntity"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="179dp"
+            android:layout_marginEnd="67dp"
+            android:layout_marginBottom="0dp"
+            android:layout_toEndOf="@+id/tvQuntity" />
 
         <TextView
             android:id="@+id/tvNameOfProduct"
@@ -27,23 +36,50 @@
             android:layout_toRightOf="@id/imViewOfProduct"
             android:layout_marginLeft="15dp"
             android:textSize="20dp"
-            android:textColor="#000"
+            android:textColor="#062DBD"
             android:textStyle="italic"
             />
 
         <TextView
-            android:id="@+id/tvPriceOfProduct"
+            android:id="@+id/tvCrossedNameOfProduct"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/imViewOfProduct"
+            android:layout_toRightOf="@id/imViewOfProduct"
+            android:layout_marginLeft="15dp"
+            android:textSize="15dp"
+            android:textColor="#C6CC0707"
+            android:textStyle="italic"
+            />
+
+        <TextView
+            android:id="@+id/tvQuntity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/tvNameOfProduct"
+            android:layout_marginStart="9dp"
+            android:layout_marginLeft="9dp"
+            android:layout_marginTop="15dp"
             android:layout_toEndOf="@+id/imViewOfProduct"
             android:layout_toRightOf="@+id/imViewOfProduct"
-            android:layout_marginLeft="70dp"
             android:paddingLeft="5dp"
-            android:textSize="15dp"
-            android:textColor="#000"
-            />
+            android:textColor="#7E062DBD"
+            android:textSize="30dp"
+            android:textStyle="italic" />
 
+        <TextView
+            android:id="@+id/tvPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/imViewCheck"
+            android:layout_marginStart="106dp"
+            android:layout_marginEnd="73dp"
+            android:layout_marginBottom="30dp"
+            android:layout_toStartOf="@+id/imViewCheck"
+            android:layout_toEndOf="@+id/tvQuntity"
+            android:textColor="#000000"
+            android:textSize="50sp" />
 
 
     </RelativeLayout>

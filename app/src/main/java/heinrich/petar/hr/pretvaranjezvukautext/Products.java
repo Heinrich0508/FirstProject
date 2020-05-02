@@ -6,24 +6,24 @@ public class Products {
     private Integer id;
     private String rootProduct;
     private String fullNameOfProduct;
-    private String descriptionOfProduct;
+    private String quantity;
     private Integer imageOfProduct;
+    //todo new
+    private String crossedFullNameOfProduct;
+    private String priceOfProduct;
+    private Integer imageCheckedItem;
+    //todo new -end
 
 
-
-
-
-    public Products(Integer id, String rootProduct, String fullNameOfProduct, String descriptionOfProduct, Integer imageOfProduct) {
+    public Products(Integer id, String rootProduct, String fullNameOfProduct, String quantity, Integer imageOfProduct, String crossedFullNameOfProduct, String priceOfProduct, Integer imageCheckedItem) {
         this.id = id;
         this.rootProduct = rootProduct;
         this.fullNameOfProduct = fullNameOfProduct;
-        this.descriptionOfProduct = descriptionOfProduct;
+        this.quantity = quantity;
         this.imageOfProduct = imageOfProduct;
-    }
-
-
-    public Products()  {
-
+        this.crossedFullNameOfProduct = crossedFullNameOfProduct;
+        this.priceOfProduct = priceOfProduct;
+        this.imageCheckedItem = imageCheckedItem;
     }
 
 
@@ -51,12 +51,12 @@ public class Products {
         this.fullNameOfProduct = fullNameOfProduct;
     }
 
-    public String getDescriptionOfProduct() {
-        return descriptionOfProduct;
+    public String getQuantity() {
+        return quantity;
     }
 
-    public void setDescriptionOfProduct(String descriptionOfProduct) {
-        this.descriptionOfProduct = descriptionOfProduct;
+    public void setQuantity(String quantity) {
+        this.quantity = quantity;
     }
 
     public Integer getImageOfProduct() {
@@ -66,4 +66,31 @@ public class Products {
     public void setImageOfProduct(Integer imageOfProduct) {
         this.imageOfProduct = imageOfProduct;
     }
+
+
+    //todo new items
+    public String getCrossedFullNameOfProduct() {
+        return crossedFullNameOfProduct;
+    }
+
+    public void setCrossedFullNameOfProduct(String crossedFullNameOfProduct) {
+        this.crossedFullNameOfProduct = crossedFullNameOfProduct;
+    }
+
+    public String getPriceOfProduct() {
+        return priceOfProduct;
+    }
+
+    public void setPriceOfProduct(String priceOfProduct) {
+        this.priceOfProduct = priceOfProduct;
+    }
+
+    public Integer getImageCheckedItem() {
+        return imageCheckedItem;
+    }
+
+    public void setImageCheckedItem(Integer imageCheckedItem) {
+        this.imageCheckedItem = imageCheckedItem;
+    }
+
 }

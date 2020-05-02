@@ -1,8 +1,10 @@
 package heinrich.petar.hr.pretvaranjezvukautext;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 
-public class Filter extends MainActivity {
+public class Filter  {
 
     String test = "This is Filter Class";
     String[] rootsOnly=null;
@@ -12,6 +14,7 @@ public class Filter extends MainActivity {
         return array;
     }
     // 2 nadi korijene i njihove pozicije u arrayu
+
     //
     public String readListReturnAdjectives(String[]convertedStringToArray){
         String adjective = "-1";
@@ -31,6 +34,7 @@ public class Filter extends MainActivity {
 
             if (convertedStringToArray[i].contains(productNameToCompare) || convertedStringToArray[i].matches(productNameToCompare)){
                 return convertedStringToArray[i-1];
+
             }
         }
         return adjective;
