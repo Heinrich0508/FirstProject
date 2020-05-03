@@ -75,8 +75,19 @@
             android:background="@android:color/white"
             android:scaleType="fitStart"
             android:src="@drawable/check_min"
-            android:textColor="#11FF00"
-            android:textStyle="bold" />
+
+            />
+
+        <ImageButton
+            android:id="@+id/btn_undo"
+            android:layout_width="80dp"
+            android:layout_height="70dp"
+            android:layout_marginLeft="10dp"
+            android:background="@android:color/white"
+            android:scaleType="fitStart"
+            android:src="@drawable/undo_min"
+            android:visibility="gone"
+            />
 
 
     </LinearLayout>

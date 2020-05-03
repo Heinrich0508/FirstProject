@@ -1,42 +1,29 @@
 package heinrich.petar.hr.pretvaranjezvukautext;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import androidx.core.graphics.drawable.DrawableCompat;
-
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.speech.RecognizerIntent;
 import android.util.Log;
-import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Checkable;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
-import static android.widget.AbsListView.CHOICE_MODE_NONE;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -48,15 +35,18 @@ public class MainActivity extends AppCompatActivity {
     //shared preferences key enter tag
     public static final String KEY_TAG_1 = "KEY_TAG_808";
 
-    private static int oneItem = 0;
+    // counter for remove items
     public static int counter = 0;
-    public static int counte2r = 0;
-    public static int save = -1;
+
+    //buttons ADD and TAKE counters
+    private int BTN_ADD_COUNTER = 1;
+    private int BTN_TAKE_OFF = 1;
 
     ImageButton btn_plus;
     ImageButton btn_minus;
     ImageButton btn_remove;
     ImageButton btn_checkIn;
+    ImageButton btn_undo;
 
 
     // views
@@ -65,24 +55,19 @@ public class MainActivity extends AppCompatActivity {
     ImageButton mVoiceButton;
     ListView listItems;
     String myWord = null;
-    Activity context;
-    Context contextOut;
-
-    Parcelable state;
-    Bundle bundle;
-
 
     //LOG TAGS
     private static final String TAG1 = "TAG1 ";
 
-
+    //todo lista u kojoj se pohranuje rezultat koji dolazi iz vana
     ArrayList<String> result = new ArrayList<String>();
+
+    //todo glavna lista u kojoj se nalaze sve komponete svakog produkta
     public static ArrayList<Products> listOFAllProducts = new ArrayList<Products>();
+    // todo glavna sporedna lista koja se uvijek puni nakon svake akcije
     public static ArrayList<Products> specialProductsInList = new ArrayList<Products>();
 
 
-    //TODO - LISTA ZA POKUPIT IDIJEVE
-    public static ArrayList<Integer> idList = new ArrayList<Integer>();
 
 
 
@@ -100,16 +85,10 @@ public class MainActivity extends AppCompatActivity {
 
         sharedPrfesMenager();
 
-
-
             if (specialProductsInList == null){
                 specialProductsInList =  new ArrayList<Products>();
             }
-
             refreshViewList();
-
-
-
 
         //button click
         mVoiceButton.setOnClickListener(new View.OnClickListener() {
@@ -119,27 +98,17 @@ public class MainActivity extends AppCompatActivity {
                         //martinTest("sir, kruh");
             }
         });
-        //refreshViewList();
+
         listItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(final AdapterView<?> parent, final View view, final int position, long id) {
              final  Products products = specialProductsInList.get(position);
                 counter = position;
 
+               final AlertDialog alertDialog =  openDialogBoxAndShowNameOfProduct(position);
 
 
-                final AlertDialog.Builder aDialogBulder = new AlertDialog.Builder(MainActivity.this);
-                final LayoutInflater layoutInflater = MainActivity.this.getLayoutInflater();
-                final View dialogView = layoutInflater.inflate(R.layout.dialog_layout,null);
-                btn_plus = (ImageButton) dialogView.findViewById(R.id.btn_plus);
-                btn_minus = (ImageButton)dialogView.findViewById(R.id.btn_minus);
-                btn_remove = (ImageButton)dialogView.findViewById(R.id.btn_remove);
-                btn_checkIn = (ImageButton)dialogView.findViewById(R.id.btn_checkIn);
-                tvShowNameOfProduct = (TextView) dialogView.findViewById(R.id.tvShowNameOfProduct);
-                tvShowNameOfProduct.setText(products.getFullNameOfProduct());
-                aDialogBulder.setView(dialogView);
-                final AlertDialog alertDialog = aDialogBulder.create();
-                alertDialog.show();
+
                 /**
                  * This button will remove item from list and delete him
                  */
@@ -150,18 +119,7 @@ public class MainActivity extends AppCompatActivity {
 
                         Toast.makeText(MainActivity.this, "Obrisano !!", Toast.LENGTH_SHORT).show();
 
-                        SharedPreferences sharedPreferences = getSharedPreferences(KEY_TAG_1,Context.MODE_PRIVATE);
-                        SharedPreferences.Editor prefsEditor = sharedPreferences.edit();
-                        Gson gson = new Gson();
-
-                        String jsonRemovedItems = gson.toJson(specialProductsInList);
-                        String jsonAddDeletedItems = gson.toJson(specialProductsInList);
-                        String jsonChekedItems = gson.toJson(specialProductsInList);
-                        prefsEditor.putString("MyObject", jsonRemovedItems);
-                        prefsEditor.putString("MyObject2", jsonAddDeletedItems);
-                        prefsEditor.putString("MyObject5", jsonChekedItems);
-
-                        prefsEditor.apply();
+                        setSharedPrefernces();
                         alertDialog.dismiss();
                         refreshViewList();
                     }
@@ -176,67 +134,91 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(View v) {
 
 
-
-                        //TODO -DODAJEM NOVI KOD
-                        //TODO POKUSAT CU DOBIT POZICIJU OD ODABRANOG ITEMA
-                        int itemPosition = position;
-                        //TODO TU POZICIU STAVITI NA ZDANJE MJESTO U LISTI
-                        Products productItem = null;
-                        Integer saveItemID = specialProductsInList.get(itemPosition).getId();
+                        
+                        
                         //todo - mičem ga kada sam ga odabrao
-                        specialProductsInList.remove(itemPosition);
-                        Log.d(TAG1,"id "+saveItemID);
-                        for (Products p:listOFAllProducts){
-                            if (p.getId().equals(saveItemID)){
-                                idList.add(saveItemID);
-                                productItem = p;
-                                break;
-                            }
-                        }
-                        //todo - stavljam ga ponovno na kraj
-                        specialProductsInList.add(productItem);
-                        //TODO -DODAJEM MU STATUS KUPLJENO
-
-
-                       // String lastItemNameOfProduct = specialProductsInList.get(specialProductsInList.size()-1).getFullNameOfProduct();
-                        //specialProductsInList.get(specialProductsInList.size()-1).setFullNameOfProduct("");
-                       // specialProductsInList.get(specialProductsInList.size()-1).setCrossedFullNameOfProduct(lastItemNameOfProduct);
-
-                        specialProductsInList.get(specialProductsInList.size()-1).setQuantity("20");
+                        specialProductsInList.remove(position);
+                        setProductOnSpecificPositionInList(products,10001,true);
                         specialProductsInList.get(specialProductsInList.size()-1).setImageCheckedItem(R.drawable.check_min);
-                        specialProductsInList.get(specialProductsInList.size()-1).setPriceOfProduct("150");
-
-                        Log.d(TAG1,"priceofProduct "+ specialProductsInList.get(specialProductsInList.size()-1).getPriceOfProduct());
 
 
-
-
-                        //todo - treba napravit da se btn_checkin makne kada se jednom stisne
-
-
-                        SharedPreferences sharedPreferences = getSharedPreferences(KEY_TAG_1, Context.MODE_PRIVATE);
-                        SharedPreferences.Editor prefsEditor = sharedPreferences.edit();
-                        Gson gson = new Gson();
-
-                        String jsonRemovedItems = gson.toJson(specialProductsInList);
-                        String jsonAddDeletedItems = gson.toJson(specialProductsInList);
-                        String jsonChekedItems = gson.toJson(specialProductsInList);
-                        prefsEditor.putString("MyObject", jsonRemovedItems);
-                        prefsEditor.putString("MyObject2", jsonAddDeletedItems);
-                        prefsEditor.putString("MyObject5", jsonChekedItems);
-
-                        prefsEditor.apply();
-                        Log.d("counterLog", "" + specialProductsInList.get(specialProductsInList.size()-1) + " AFTER");
+                        setSharedPrefernces();
                         alertDialog.dismiss();
                         refreshViewList();
 
-                        Log.d(TAG1,"priceofProduct 2 "+ specialProductsInList.get(specialProductsInList.size()-1).getPriceOfProduct());
+
+                        Resources res = getResources();
+                        specialProductsInList.get(specialProductsInList.size()-1).setPriceOfProduct("150");
+                        String valuate = res.getString(R.string.price_valute,products.getPriceOfProduct());
+
+                        specialProductsInList.get(specialProductsInList.size()-1).setPriceOfProduct(valuate);
 
 
 
+                    }
+                });
+
+                btn_undo.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        products.setImageCheckedItem(R.drawable.white_background_min);
+
+                        specialProductsInList.remove(position);
+                        setProductOnSpecificPositionInList(products,0,false);
+
+                        refreshViewList();
+                        setSharedPrefernces();
+                        alertDialog.dismiss();
+                    }
+                });
 
 
+                //todo gumb metoda za dodavvanje++
+                btn_plus.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        int quantityOfItem = 0;
+                        String quantityOfItemString =specialProductsInList.get(position).getQuantity();
+                        //ako nema nist setiram nulu
+                        if (quantityOfItemString.equals("")) {
+                            specialProductsInList.get(position).setQuantity(""+BTN_ADD_COUNTER);
 
+                            Toast.makeText(MainActivity.this, "+"+BTN_ADD_COUNTER, Toast.LENGTH_SHORT).show();
+                        }else {
+                            quantityOfItem = Integer.parseInt(quantityOfItemString);
+                            quantityOfItem += BTN_ADD_COUNTER;
+                            specialProductsInList.get(position).setQuantity("" + quantityOfItem);
+
+                            Toast.makeText(MainActivity.this, "+"+quantityOfItem, Toast.LENGTH_SHORT).show();
+                        }
+
+                        setSharedPrefernces();
+                        refreshViewList();
+                    }
+                });
+
+                //todo gumb metoda za oduzimanje--
+                btn_minus.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        int quantityOfItem = 0;
+                        String quantityOfItemString =specialProductsInList.get(position).getQuantity();
+                        //ako nema nist setiram nulu
+                        if (quantityOfItemString.equals("")) {
+                            specialProductsInList.get(position).setQuantity(""+0);
+                        }else {
+                            quantityOfItem = Integer.parseInt(quantityOfItemString);
+                            quantityOfItem -= BTN_TAKE_OFF;
+                            if (quantityOfItem<0){
+                                quantityOfItem = 0;
+                            }else{
+                                specialProductsInList.get(position).setQuantity("" + quantityOfItem);
+                                Toast.makeText(MainActivity.this, "-"+quantityOfItem, Toast.LENGTH_SHORT).show();
+                            }
+
+                        }
+                        setSharedPrefernces();
+                        refreshViewList();
                     }
                 });
             }
@@ -244,7 +226,57 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //todo - metoda upravlja sa shared preferencima
+    //todo - metoda otvara alert dialog i ispisuje naslov produkta na koji je korisnik kliknuo i brine
+    // o postavljanju chek in gumba ili undo gumba
+        private AlertDialog openDialogBoxAndShowNameOfProduct(int position){
+            Products p = specialProductsInList.get(position);
+            Integer getCheck = R.drawable.check_min;
+            boolean verifiyCheckButton = p.getImageCheckedItem().equals(getCheck);
+        final  Products products = specialProductsInList.get(position);
+        final AlertDialog.Builder aDialogBulder = new AlertDialog.Builder(MainActivity.this);
+        final LayoutInflater layoutInflater = MainActivity.this.getLayoutInflater();
+        final View dialogView = layoutInflater.inflate(R.layout.dialog_layout,null);
+        btn_plus = (ImageButton) dialogView.findViewById(R.id.btn_plus);
+        btn_minus = (ImageButton)dialogView.findViewById(R.id.btn_minus);
+        btn_remove = (ImageButton)dialogView.findViewById(R.id.btn_remove);
+        btn_undo = (ImageButton)dialogView.findViewById(R.id.btn_undo);
+            if (verifiyCheckButton){
+                btn_checkIn = (ImageButton)dialogView.findViewById(R.id.btn_checkIn);
+                btn_checkIn.setVisibility(View.GONE);
+                btn_undo.setVisibility(View.VISIBLE);
+            }else{
+                btn_checkIn = (ImageButton)dialogView.findViewById(R.id.btn_checkIn);
+            }
+        tvShowNameOfProduct = (TextView) dialogView.findViewById(R.id.tvShowNameOfProduct);
+        tvShowNameOfProduct.setText(products.getFullNameOfProduct());
+        aDialogBulder.setView(dialogView);
+        final AlertDialog alertDialog = aDialogBulder.create();
+        alertDialog.show();
+        return alertDialog;
+    }
+
+    //todo metoda setira preference
+    private void setSharedPrefernces(){
+        SharedPreferences sharedPreferences = getSharedPreferences(KEY_TAG_1, Context.MODE_PRIVATE);
+        SharedPreferences.Editor prefsEditor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String jsonRemovedItems = gson.toJson(specialProductsInList);
+        String jsonAddDeletedItems = gson.toJson(specialProductsInList);
+        String jsonChekedItems = gson.toJson(specialProductsInList);
+        String jsonQuantityAdd = gson.toJson(specialProductsInList);
+        String jsonQuantityTake = gson.toJson(specialProductsInList);
+        String jsonUndoPosition = gson.toJson(specialProductsInList);
+        prefsEditor.putString("MyObject", jsonRemovedItems);
+        prefsEditor.putString("MyObject2", jsonAddDeletedItems);
+        prefsEditor.putString("MyObject5", jsonChekedItems);
+        prefsEditor.putString("MyObject6", jsonQuantityAdd);
+        prefsEditor.putString("MyObject7", jsonQuantityTake);
+        prefsEditor.putString("MyObject8", jsonUndoPosition);
+        prefsEditor.apply();
+    }
+
+
+    //todo - metoda upravlja sa shared preferencima - dohvaca ih
     private void sharedPrfesMenager() {
         Gson gson = new Gson();
         Type type = new TypeToken<ArrayList<Products>>() { }.getType();
@@ -258,6 +290,15 @@ public class MainActivity extends AppCompatActivity {
 
         String addDeletAllProductsJson = sharedPreferences.getString("MyObject5", "");
         specialProductsInList = gson.fromJson(addDeletAllProductsJson, type);
+
+        String addBtn = sharedPreferences.getString("MyObject6", "");
+        specialProductsInList = gson.fromJson(addBtn, type);
+
+        String takeBtn = sharedPreferences.getString("MyObject7", "");
+        specialProductsInList = gson.fromJson(takeBtn, type);
+
+        String undoPosition = sharedPreferences.getString("MyObject8", "");
+        specialProductsInList = gson.fromJson(undoPosition, type);
     }
 
 
@@ -265,158 +306,156 @@ public class MainActivity extends AppCompatActivity {
     //add all to list
     public static void setAllInList(){
 
-        listOFAllProducts.add(new Products(0,".*KRUH.*","KRUH","",R.drawable.bread_min,"","",R.drawable.white_background_min));
-        listOFAllProducts.add(new Products(1,".*SIR.*","SIR","",R.drawable.cheese_min,"","",R.drawable.white_background_min));
-        listOFAllProducts.add(new Products(2,".*SALAM.*","SALAMA","",R.drawable.salami_min,"","",R.drawable.white_background_min));
-        listOFAllProducts.add(new Products(3,".*PIV.*","PIVA","",R.drawable.beer,"","",R.drawable.white_background_min));
-        listOFAllProducts.add(new Products(4,".*ČAJ.*","ČAJ","",R.drawable.caj_2,"","",R.drawable.white_background_min));
-        listOFAllProducts.add(new Products(5,".*ČOKOLAD.*","ČOKOLADA","",R.drawable.chocolate,"","",R.drawable.white_background_min));
-        listOFAllProducts.add(new Products(6,".*VIN.*","VINO","",R.drawable.vino_2,"","",R.drawable.white_background_min));
-        listOFAllProducts.add(new Products(6,".*ANANAS.*","ANANAS","",R.drawable.penaple,"","",R.drawable.white_background_min));
-        listOFAllProducts.add(new Products(7,".*GROŽĐ.*","GROŽĐE","",R.drawable.grozd,"","",R.drawable.white_background_min));
-        listOFAllProducts.add(new Products(8,".*KAV.*","KAVA","",R.drawable.cofee_cup,"","",R.drawable.white_background_min));
-        listOFAllProducts.add(new Products(9,".*KRUMPIR.*","KRUMPIR","",R.drawable.potato,"","",R.drawable.white_background_min));
-        /*listOFAllProducts.add(new Products(10,".*NARANČ.*","NARANČA","količina: ",R.drawable.orange));
-        listOFAllProducts.add(new Products(11,".*SOL.*","SOL","količina: ",R.drawable.sol_2));
-        listOFAllProducts.add(new Products(12,".*PEKMEZ.*","PEKMEZ","količina: ",R.drawable.jam));
-        listOFAllProducts.add(new Products(13,".*JAGOD.*","JAGODE","količina: ",R.drawable.jagoda));
-        listOFAllProducts.add(new Products(14,".*RIB.*","RIBE","količina: ",R.drawable.fish_min));
-        listOFAllProducts.add(new Products(15,".*JABUK.*","JABUKA","količina: ",R.drawable.apple_min));
-        listOFAllProducts.add(new Products(16,".*JAJ.*","JAJA","količina: ",R.drawable.egg_min));
-        listOFAllProducts.add(new Products(17,".*MLIJEK.*","MLIJEKO","količina: ",R.drawable.milk_min));
-        listOFAllProducts.add(new Products(18,".*MED.*","MED","količina: ",R.drawable.apitherapy_min));
-        listOFAllProducts.add(new Products(19,".*RAKIJ.*","RAKIJA","količina: ",R.drawable.brandy_min));
-        listOFAllProducts.add(new Products(20,".*BROKUL.*","BROKULA","količina: ",R.drawable.broccoli_min));
-        listOFAllProducts.add(new Products(21,".*MRKV.*","MRKVA","količina: ",R.drawable.carrot_min));
-        listOFAllProducts.add(new Products(22,".*ČIPS.*","ČIPS","količina: ",R.drawable.chips_min));
-        listOFAllProducts.add(new Products(23,".*NESCAFE.*","NESCAFE","količina: ",R.drawable.coffee_cup_min));
-        listOFAllProducts.add(new Products(24,".*KVAS.*","KVASAC","količina: ",R.drawable.dough_min));
-        listOFAllProducts.add(new Products(25,".*COCA-COL.*","COCA-COLA","količina: ",R.drawable.drink_min));
-        listOFAllProducts.add(new Products(26,".*BRAŠN.*","BRAŠNO","količina: ",R.drawable.flour_min));
-        listOFAllProducts.add(new Products(27,".*ČEŠNJ.*","ČEŠNJAK","količina: ",R.drawable.garlic_min));
-        listOFAllProducts.add(new Products(28,".*KIV.*","KIVI","količina: ",R.drawable.kiwi_min));
-        listOFAllProducts.add(new Products(29,".*TJESTE.*","TJESTENINA","količina: ",R.drawable.macaroni_min));
-        listOFAllProducts.add(new Products(30,".*MAJONEZ.*","MAJONEZA","količina: ",R.drawable.mayonnaise_min));
-        listOFAllProducts.add(new Products(31,".*KOKIC.*","KOKICE","količina: ",R.drawable.popcorn_min));
-        listOFAllProducts.add(new Products(32,".*ŽGANC.*","ŽGANCI","količina: ",R.drawable.porridge_min));
-        listOFAllProducts.add(new Products(33,".*RIŽ.*","RIŽA","količina: ",R.drawable.rice_min));
-        listOFAllProducts.add(new Products(34,".*PAP.*","PAPAR","količina: ",R.drawable.salt_min));
-        listOFAllProducts.add(new Products(35,".*ŠPAGET.*","ŠPAGETI","količina: ",R.drawable.spaghetti_min));
-        listOFAllProducts.add(new Products(36,".*MINERAL.* VOD.*","MINERALNA VODA","količina: ",R.drawable.sparkling_water_min));
-        listOFAllProducts.add(new Products(37,".*ŠEĆER.*","ŠEĆER","količina: ",R.drawable.sugar_min));
-        listOFAllProducts.add(new Products(38,".*MASLA.*","MASLAC","količina: ",R.drawable.toast_min));
-        listOFAllProducts.add(new Products(39,".*VEGET.*","VEGETA","količina: ",R.drawable.vegetable_min));
-        listOFAllProducts.add(new Products(40,".*VOD.*","VODA","količina: ",R.drawable.water_bottle_min));
-        listOFAllProducts.add(new Products(41,".*JOGURT.*","JOGURT","količina: ",R.drawable.yogurt_min));
-        listOFAllProducts.add(new Products(42,".*CIKL.*","CIKLA","količina: ",R.drawable.beetroot_min));
-        listOFAllProducts.add(new Products(43,".*DETERDŽENT.*","DETERDŽENT","količina: ",R.drawable.bleach_min));
-        listOFAllProducts.add(new Products(44,".*PILETIN.*","PILETINA","količina: ",R.drawable.chicken_min));
-        listOFAllProducts.add(new Products(45,".*KROASAN.*","KROASAN","količina: ",R.drawable.croissant_min));
-        listOFAllProducts.add(new Products(46,".*MASLINO.* ULJ.*","MASLINOVO ULJE","količina: ",R.drawable.dippel_oil_min));
-        listOFAllProducts.add(new Products(47,".*MES.*","MESO","količina: ",R.drawable.meat_min));
-        listOFAllProducts.add(new Products(48,".*SOK.*","SOK","količina: ",R.drawable.orange_juice_min));
-        listOFAllProducts.add(new Products(49,".*SVINJETIN.*","SVINJETINA","količina: ",R.drawable.pig_min));
-        listOFAllProducts.add(new Products(50,".*PARADAJZ.*","PARADAJZ","količina: ",R.drawable.tomato_min));
-        listOFAllProducts.add(new Products(51,".*PAST.*ZUBE.*","ZUBNA PASTA","količina: ",R.drawable.toothbrush_min));
-        listOFAllProducts.add(new Products(52,".*JANJETIN.*","JANJETINA","količina: ",R.drawable.lamb_min));
-        listOFAllProducts.add(new Products(53,".*MAHUN.*","MAHUNE","količina: ",R.drawable.green_beans_min));
-        listOFAllProducts.add(new Products(54,".*KUPUS.*","KUPUS","količina: ",R.drawable.vegetarian_min));
-        listOFAllProducts.add(new Products(55,".*PERŠIN.*","PERŠIN","količina: ",R.drawable.parsley_min));
-        listOFAllProducts.add(new Products(56,".*KRASTAV.*","KRASTAVAC","količina: ",R.drawable.cucumber_min));
-        listOFAllProducts.add(new Products(57,".*KISE.* KRASTAV.*","KISELI KRASTAVAC","količina: ",R.drawable.jar_min));
-        listOFAllProducts.add(new Products(58,".* LUK.*","LUK","količina: ",R.drawable.onion_min));
-        listOFAllProducts.add(new Products(59,".*PAPRIK.*","PAPRIKA","količina: ",R.drawable.paprika_min));
-        listOFAllProducts.add(new Products(60,".*FEFERON.*","FEFERON","količina: ",R.drawable.chili_min));
-        listOFAllProducts.add(new Products(61,".*SALAT.*","SALATA","količina: ",R.drawable.salad_min));
-        listOFAllProducts.add(new Products(62,".*GRAH.*","GARAH","količina: ",R.drawable.bean_min));
-        listOFAllProducts.add(new Products(63,".*LJEŠNJ.*","LJEŠNJAK","količina: ",R.drawable.nut_min));
-        listOFAllProducts.add(new Products(64,".*WC PAPIR.*","WC PAPIR","količina: ",R.drawable.wc_papir_min));
-        listOFAllProducts.add(new Products(65,".*SMRZNUT.* POVRĆ.*","SMRZNUTO POVRĆE","količina: ",R.drawable.vegetable_garden_min));
-        listOFAllProducts.add(new Products(66,".*OCA.*","OCAT","količina: ",R.drawable.vinegar_min));
-        listOFAllProducts.add(new Products(67,".*ORAH.*","ORAH","količina: ",R.drawable.walnut_min));
-        listOFAllProducts.add(new Products(68,".*VOĆN.* JOGURT.*","VOĆNI JOGURT","količina: ",R.drawable.yogurt_voc_min));
-        listOFAllProducts.add(new Products(69,".*BANAN.*","BANANE","količina: ",R.drawable.banana_min));
-        listOFAllProducts.add(new Products(70,".*UGLJEN.*","UGLJEN","količina: ",R.drawable.coal_min));
-        listOFAllProducts.add(new Products(71,".*POMFR.*","POMFRIT","količina: ",R.drawable.pomes_min));
-        listOFAllProducts.add(new Products(72,".*ŠKAMP.*","ŠKAMPE","količina: ",R.drawable.skamp_min));
-        listOFAllProducts.add(new Products(73,".*PORILUK.*","PORILUK","količina: ",R.drawable.leek_min));
-        listOFAllProducts.add(new Products(74,".*GRAŠ.*","GARAŠAK","količina: ",R.drawable.legume_min));
-        listOFAllProducts.add(new Products(75,".*LIMU.*","LIMUN","količina: ",R.drawable.lemon_min));
-        listOFAllProducts.add(new Products(76,".*KRUŠK.*","KRUŠKA","količina: ",R.drawable.pear_min));
-        listOFAllProducts.add(new Products(77,".*PRAŠ.*ZA.*VE.*","PRAŠAK ZA PRANJE VEŠA","količina: ",R.drawable.powder_min));
-        listOFAllProducts.add(new Products(78,".*SAPUN.*","SAPUN","količina: ",R.drawable.soap_min));
-        listOFAllProducts.add(new Products(79,".*JUH.*","JUHA","količina: ",R.drawable.soup_min));
-        listOFAllProducts.add(new Products(80,".*AVOKAD.*","AVOKADO","količina: ",R.drawable.avocado_min));
-        listOFAllProducts.add(new Products(81,".*HAMBURGER.*","HAMBURGER","količina: ",R.drawable.burger_min));
-        listOFAllProducts.add(new Products(82,".*GRICKALIC.*","GRICKALICE","količina: ",R.drawable.chocolate_min));
-        listOFAllProducts.add(new Products(83,".*CRVEN.*PAP.*","CRVENA PAPRIKA","količina: ",R.drawable.crvena_pa_min));
-        listOFAllProducts.add(new Products(84,".*PUDING.*","PUDING","količina: ",R.drawable.dessert_min));
-        listOFAllProducts.add(new Products(85,".*GLJIV.*","GLJIVE","količina: ",R.drawable.gljive_min));
-        listOFAllProducts.add(new Products(86,".*KIKI.*","KIKI - RIKI","količina: ",R.drawable.kiki_min));
-        listOFAllProducts.add(new Products(87,".*PAPIR.*ZA.*PEČ.*","PAPIR ZA PEČENJE","količina: ",R.drawable.papir_za_kuh_min));
-        listOFAllProducts.add(new Products(88,".*LJEK.*","LJEK","količina: ",R.drawable.pharmacy_min));
-        listOFAllProducts.add(new Products(89,".*ŠAMPINJON.*","ŠAMPINJONI","količina: ",R.drawable.sampinjoni_min));
-        listOFAllProducts.add(new Products(90,".*SIR.*NAMAZ.*","SIRNI NAMAZ","količina: ",R.drawable.sirni_namaz_min));
-        listOFAllProducts.add(new Products(91,".*ŠKOLJK.*","ŠKOLJKE","količina: ",R.drawable.clam_min));
-        listOFAllProducts.add(new Products(92,".*GRIZ.*","GRIZ","količina: ",R.drawable.couscous_min));
-        listOFAllProducts.add(new Products(93,".*KNEDL.*","KNEDLE","količina: ",R.drawable.dumpling_min));
-        listOFAllProducts.add(new Products(94,".*SPUŽV.*","SPUŽVA","količina: ",R.drawable.spuzva_min));
-        listOFAllProducts.add(new Products(95,".*PARMEZAN.*","PARMEZAN","količina: ",R.drawable.grater_min));
-        listOFAllProducts.add(new Products(96,".*ŠUNK.*","ŠUNKA","količina: ",R.drawable.ham_min));
-        listOFAllProducts.add(new Products(97,".*SLADOLED.*","SLADOLED","količina: ",R.drawable.sladoled_min));
-        listOFAllProducts.add(new Products(98,".*KEČAP.*","KEČAP","količina: ",R.drawable.kecap_min));
-        listOFAllProducts.add(new Products(99,".*PARADAJZ.*TUB.*","PARADAJZ U TUBI","količina: ",R.drawable.par_tuba_min));
-        listOFAllProducts.add(new Products(100,".*KOBAS.*","KOBASE","količina: ",R.drawable.kobasa_min));
-        listOFAllProducts.add(new Products(101,".*PAŠTET.*","PAŠTETA","količina: ",R.drawable.pate_min));
-        listOFAllProducts.add(new Products(102,".*BONBONJER.*","BONBONJERA","količina: ",R.drawable.snack_min));
-        listOFAllProducts.add(new Products(103,".*ULJ.*","ULJE","količina: ",R.drawable.oil_min));
-        listOFAllProducts.add(new Products(104,".*ŠLAG.*","ŠLAG","količina: ",R.drawable.slag_min));
-        listOFAllProducts.add(new Products(105,".*ŠPEK.*","ŠPEK","količina: ",R.drawable.bacon_min));
-        listOFAllProducts.add(new Products(106,".*KOLAČ.*","KOLAČ","količina: ",R.drawable.kolac_min));
-        listOFAllProducts.add(new Products(107,".*TORT.*","TORTA","količina: ",R.drawable.torta_min));
-        listOFAllProducts.add(new Products(108,".*BONBON.*","BONBONI","količina: ",R.drawable.candy_min));
-        listOFAllProducts.add(new Products(109,".*BAT.*","BATAK","količina: ",R.drawable.chicke2n_min));
-        listOFAllProducts.add(new Products(110,".*SNIKERS.*","SNIKERS","količina: ",R.drawable.cokoladica_min));
-        listOFAllProducts.add(new Products(111,".*KONDOM.*","KONDOM","količina: ",R.drawable.condom_min));
-        listOFAllProducts.add(new Products(112,".*PJEN.*ZA.*B.*","PJENA ZA BRIJANJE","količina: ",R.drawable.shave_min));
-        listOFAllProducts.add(new Products(113,".*ČETKIC.*","ČETKICA ZA ZUBE","količina: ",R.drawable.toothbrush2_min));
-        listOFAllProducts.add(new Products(114,".*VLAŽN.*M.*C.*","VLAŽNE MARAMICE","količina: ",R.drawable.wet_wipes_min));
-        listOFAllProducts.add(new Products(115,".*MARAMIC.*","MARAMICE","količina: ",R.drawable.sneezing_min));
-        listOFAllProducts.add(new Products(116,".*TENISIC.*","TENISICE","količina: ",R.drawable.feet_min));
-        listOFAllProducts.add(new Products(117,".*CEDEVIT.*","CEDEVITA","količina: ",R.drawable.juice_box_min));
-        listOFAllProducts.add(new Products(118,".*BATERIJ.*","BATERIJA","količina: ",R.drawable.power_min));
-        listOFAllProducts.add(new Products(119,".*KEKS.*","KEKSI","količina: ",R.drawable.biscuit_min));
-        listOFAllProducts.add(new Products(120,".*MLINIC.*","MLINICI","količina: ",R.drawable.tortillas_min));
-        listOFAllProducts.add(new Products(121,".*KUKURUZ.*","KUKURUZ","količina: ",R.drawable.corn_min));
-        listOFAllProducts.add(new Products(122,".*VRHNJ.* I S.*","VRHNJE I SIR","količina: ",R.drawable.cream_min));
-        listOFAllProducts.add(new Products(123,".*MLAD.* LUK.*","MLADI LUK","količina: ",R.drawable.onion_young_min));
-        listOFAllProducts.add(new Products(124,".*MARELIC.*","MARELICA","količina: ",R.drawable.apricot_min));
-        listOFAllProducts.add(new Products(125,".*ŽITARIC.*","ŽITARICE","količina: ",R.drawable.cereal_min));
-        listOFAllProducts.add(new Products(126,".*KAP.*","KAPA","količina: ",R.drawable.cap_min));
-        listOFAllProducts.add(new Products(127,".*DASK.* ZA .*REZANJE.*","DASKA ZA REZANJE","količina: ",R.drawable.knife_min));
-        listOFAllProducts.add(new Products(128,".*TREŠNJ.*","TREŠNJA","količina: ",R.drawable.fruit_min));
-        listOFAllProducts.add(new Products(129,".*BOROVNIC.*","BOROVNICA","količina: ",R.drawable.blueberry_min));
-        listOFAllProducts.add(new Products(130,".*PREGAČ.*","PREGAČA","količina: ",R.drawable.apron_min));
-        listOFAllProducts.add(new Products(131,".*KABANIC.*","KABANIC","količina: ",R.drawable.raincoat_min));
-        listOFAllProducts.add(new Products(132,".*KOŠULJ.*","KOŠULJA","količina: ",R.drawable.clothes_min));
-        listOFAllProducts.add(new Products(133,".*MAJCA.*KR.*","MAJCA KRATKIH RUKAVA","količina: ",R.drawable.dirtyshirt_min));
-        listOFAllProducts.add(new Products(134,".*ČARAP.*","ČARAPE","količina: ",R.drawable.socks_min));
-        listOFAllProducts.add(new Products(135,".*VEST.*","VESTA","količina: ",R.drawable.clothesdif_min));
-        listOFAllProducts.add(new Products(136,".*ČIZM.*","ČIZME","količina: ",R.drawable.boot_min));
-        listOFAllProducts.add(new Products(137,".*SANDAL.*","SANDALE","količina: ",R.drawable.sandals_min));
-        listOFAllProducts.add(new Products(138,".*NAOČAL.*","NAOČALE","količina: ",R.drawable.glasses_min));
-        listOFAllProducts.add(new Products(139,".*SUNČ.* NAOČ.*","SUNČANE NAOČALE","količina: ",R.drawable.fashion_min));
-        listOFAllProducts.add(new Products(140,".*TEPIH.*","TEPIH","količina: ",R.drawable.carpet_min));
-        listOFAllProducts.add(new Products(141,".*ŽARULJ.*","ŽARULJA","količina: ",R.drawable.idea_min));
-        listOFAllProducts.add(new Products(142,".*KART.*","KARTE","količina: ",R.drawable.casino_min));*/
+        listOFAllProducts.add(new Products(-1,".*KRUH.*","KRUH","",R.drawable.bread_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(0,".*SIR.*","SIR","",R.drawable.cheese_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(1,".*SALAM.*","SALAMA","",R.drawable.salami_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(2,".*PIV.*","PIVA","",R.drawable.beer,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(3,".*ČAJ.*","ČAJ","",R.drawable.caj_2,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(4,".*ČOKOLAD.*","ČOKOLADA","",R.drawable.chocolate,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(5,".*VIN.*","VINO","",R.drawable.vino_2,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(6,".*ANANAS.*","ANANAS","",R.drawable.penaple,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(7,".*GROŽĐ.*","GROŽĐE","",R.drawable.grozd,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(8,".*KAV.*","KAVA","",R.drawable.cofee_cup,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(9,".*KRUMPIR.*","KRUMPIR","",R.drawable.potato,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(10,".*NARANČ.*","NARANČA","",R.drawable.orange,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(11,".*SOL.*","SOL","",R.drawable.sol_2,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(12,".*PEKMEZ.*","PEKMEZ","",R.drawable.jam,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(13,".*JAGOD.*","JAGODE","",R.drawable.jagoda,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(14,".*RIB.*","RIBE","",R.drawable.fish_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(15,".*JABUK.*","JABUKA","",R.drawable.apple_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(16,".*JAJ.*","JAJA","",R.drawable.egg_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(17,".*MLIJEK.*","MLIJEKO","",R.drawable.milk_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(18,".*MED.*","MED","",R.drawable.apitherapy_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(19,".*RAKIJ.*","RAKIJA","",R.drawable.brandy_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(20,".*BROKUL.*","BROKULA","",R.drawable.broccoli_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(21,".*MRKV.*","MRKVA","",R.drawable.carrot_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(22,".*ČIPS.*","ČIPS","",R.drawable.chips_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(23,".*NESCAFE.*","NESCAFE","",R.drawable.coffee_cup_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(24,".*KVAS.*","KVASAC","",R.drawable.dough_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(25,".*COCA-COL.*","COCA-COLA","",R.drawable.drink_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(26,".*BRAŠN.*","BRAŠNO","",R.drawable.flour_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(27,".*ČEŠNJ.*","ČEŠNJAK","",R.drawable.garlic_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(28,".*KIV.*","KIVI","",R.drawable.kiwi_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(29,".*TJESTE.*","TJESTENINA","",R.drawable.macaroni_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(30,".*MAJONEZ.*","MAJONEZA","",R.drawable.mayonnaise_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(31,".*KOKIC.*","KOKICE","",R.drawable.popcorn_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(32,".*ŽGANC.*","ŽGANCI","",R.drawable.porridge_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(33,".*RIŽ.*","RIŽA","",R.drawable.rice_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(34,".*PAP.*","PAPAR","",R.drawable.salt_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(35,".*ŠPAGET.*","ŠPAGETI","",R.drawable.spaghetti_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(36,".*MINERAL.* VOD.*","MINERALNA VODA","",R.drawable.sparkling_water_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(37,".*ŠEĆER.*","ŠEĆER","",R.drawable.sugar_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(38,".*MASLA.*","MASLAC","",R.drawable.toast_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(39,".*VEGET.*","VEGETA","",R.drawable.vegetable_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(40,".*VOD.*","VODA","",R.drawable.water_bottle_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(41,".*JOGURT.*","JOGURT","",R.drawable.yogurt_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(42,".*CIKL.*","CIKLA","",R.drawable.beetroot_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(43,".*DETERDŽENT.*","DETERDŽENT","",R.drawable.bleach_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(44,".*PILETIN.*","PILETINA","",R.drawable.chicken_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(45,".*KROASAN.*","KROASAN","",R.drawable.croissant_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(46,".*MASLINO.* ULJ.*","MASLINOVO ULJE","",R.drawable.dippel_oil_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(47,".*MES.*","MESO","",R.drawable.meat_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(48,".*SOK.*","SOK","",R.drawable.orange_juice_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(49,".*SVINJETIN.*","SVINJETINA","",R.drawable.pig_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(50,".*PARADAJZ.*","PARADAJZ","",R.drawable.tomato_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(51,".*PAST.*ZUBE.*","ZUBNA PASTA","",R.drawable.toothbrush_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(52,".*JANJETIN.*","JANJETINA","",R.drawable.lamb_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(53,".*MAHUN.*","MAHUNE","",R.drawable.green_beans_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(54,".*KUPUS.*","KUPUS","",R.drawable.vegetarian_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(55,".*PERŠIN.*","PERŠIN","",R.drawable.parsley_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(56,".*KRASTAV.*","KRASTAVAC","",R.drawable.cucumber_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(57,".*KISE.* KRASTAV.*","KISELI KRASTAVAC","",R.drawable.jar_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(58,".* LUK.*","LUK","",R.drawable.onion_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(59,".*PAPRIK.*","PAPRIKA","",R.drawable.paprika_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(60,".*FEFERON.*","FEFERON","",R.drawable.chili_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(61,".*SALAT.*","SALATA","",R.drawable.salad_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(62,".*GRAH.*","GARAH","",R.drawable.bean_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(63,".*LJEŠNJ.*","LJEŠNJAK","",R.drawable.nut_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(64,".*WC PAPIR.*","WC PAPIR","",R.drawable.wc_papir_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(65,".*SMRZNUT.* POVRĆ.*","SMRZNUTO POVRĆE","",R.drawable.vegetable_garden_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(66,".*OCA.*","OCAT","",R.drawable.vinegar_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(67,".*ORAH.*","ORAH","",R.drawable.walnut_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(68,".*VOĆN.* JOGURT.*","VOĆNI JOGURT","",R.drawable.yogurt_voc_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(69,".*BANAN.*","BANANE","",R.drawable.banana_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(70,".*UGLJEN.*","UGLJEN","",R.drawable.coal_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(71,".*POMFR.*","POMFRIT","",R.drawable.pomes_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(72,".*ŠKAMP.*","ŠKAMPE","",R.drawable.skamp_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(73,".*PORILUK.*","PORILUK","",R.drawable.leek_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(74,".*GRAŠ.*","GARAŠAK","",R.drawable.legume_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(75,".*LIMU.*","LIMUN","",R.drawable.lemon_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(76,".*KRUŠK.*","KRUŠKA","",R.drawable.pear_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(77,".*PRAŠ.*ZA.*VE.*","PRAŠAK ZA PRANJE VEŠA","",R.drawable.powder_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(78,".*SAPUN.*","SAPUN","",R.drawable.soap_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(79,".*JUH.*","JUHA","",R.drawable.soup_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(80,".*AVOKAD.*","AVOKADO","",R.drawable.avocado_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(81,".*HAMBURGER.*","HAMBURGER","",R.drawable.burger_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(82,".*GRICKALIC.*","GRICKALICE","",R.drawable.chocolate_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(83,".*CRVEN.*PAP.*","CRVENA PAPRIKA","",R.drawable.crvena_pa_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(84,".*PUDING.*","PUDING","",R.drawable.dessert_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(85,".*GLJIV.*","GLJIVE","",R.drawable.gljive_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(86,".*KIKI.*","KIKI - RIKI","",R.drawable.kiki_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(87,".*PAPIR.*ZA.*PEČ.*","PAPIR ZA PEČENJE","",R.drawable.papir_za_kuh_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(88,".*LJEK.*","LJEK","",R.drawable.pharmacy_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(89,".*ŠAMPINJON.*","ŠAMPINJONI","",R.drawable.sampinjoni_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(90,".*SIR.*NAMAZ.*","SIRNI NAMAZ","",R.drawable.sirni_namaz_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(91,".*ŠKOLJK.*","ŠKOLJKE","",R.drawable.clam_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(92,".*GRIZ.*","GRIZ","",R.drawable.couscous_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(93,".*KNEDL.*","KNEDLE","",R.drawable.dumpling_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(94,".*SPUŽV.*","SPUŽVA","",R.drawable.spuzva_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(95,".*PARMEZAN.*","PARMEZAN","",R.drawable.grater_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(96,".*ŠUNK.*","ŠUNKA","",R.drawable.ham_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(97,".*SLADOLED.*","SLADOLED","",R.drawable.sladoled_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(98,".*KEČAP.*","KEČAP","",R.drawable.kecap_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(99,".*PARADAJZ.*TUB.*","PARADAJZ U TUBI","",R.drawable.par_tuba_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(100,".*KOBAS.*","KOBASE","",R.drawable.kobasa_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(101,".*PAŠTET.*","PAŠTETA","",R.drawable.pate_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(102,".*BONBONJER.*","BONBONJERA","",R.drawable.snack_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(103,".*ULJ.*","ULJE","",R.drawable.oil_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(104,".*ŠLAG.*","ŠLAG","",R.drawable.slag_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(105,".*ŠPEK.*","ŠPEK","",R.drawable.bacon_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(106,".*KOLAČ.*","KOLAČ","",R.drawable.kolac_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(107,".*TORT.*","TORTA","",R.drawable.torta_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(108,".*BONBON.*","BONBONI","",R.drawable.candy_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(109,".*BAT.*","BATAK","",R.drawable.chicke2n_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(110,".*SNIKERS.*","SNIKERS","",R.drawable.cokoladica_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(111,".*KONDOM.*","KONDOM","",R.drawable.condom_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(112,".*PJEN.*ZA.*B.*","PJENA ZA BRIJANJE","",R.drawable.shave_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(113,".*ČETKIC.*","ČETKICA ZA ZUBE","",R.drawable.toothbrush2_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(114,".*VLAŽN.*M.*C.*","VLAŽNE MARAMICE","",R.drawable.wet_wipes_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(115,".*MARAMIC.*","MARAMICE","",R.drawable.sneezing_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(116,".*TENISIC.*","TENISICE","",R.drawable.feet_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(117,".*CEDEVIT.*","CEDEVITA","",R.drawable.juice_box_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(118,".*BATERIJ.*","BATERIJA","",R.drawable.power_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(119,".*KEKS.*","KEKSI","",R.drawable.biscuit_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(120,".*MLINIC.*","MLINICI","",R.drawable.tortillas_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(121,".*KUKURUZ.*","KUKURUZ","",R.drawable.corn_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(122,".*VRHNJ.* I S.*","VRHNJE I SIR","",R.drawable.cream_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(123,".*MLAD.* LUK.*","MLADI LUK","",R.drawable.onion_young_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(124,".*MARELIC.*","MARELICA","",R.drawable.apricot_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(125,".*ŽITARIC.*","ŽITARICE","",R.drawable.cereal_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(126,".*KAP.*","KAPA","",R.drawable.cap_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(127,".*DASK.* ZA .*REZANJE.*","DASKA ZA REZANJE","",R.drawable.knife_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(128,".*TREŠNJ.*","TREŠNJA","",R.drawable.fruit_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(129,".*BOROVNIC.*","BOROVNICA","",R.drawable.blueberry_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(130,".*PREGAČ.*","PREGAČA","",R.drawable.apron_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(131,".*KABANIC.*","KABANIC","",R.drawable.raincoat_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(132,".*KOŠULJ.*","KOŠULJA","",R.drawable.clothes_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(133,".*MAJCA.*KR.*","MAJCA KRATKIH RUKAVA","",R.drawable.dirtyshirt_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(134,".*ČARAP.*","ČARAPE","",R.drawable.socks_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(135,".*VEST.*","VESTA","",R.drawable.clothesdif_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(136,".*ČIZM.*","ČIZME","",R.drawable.boot_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(137,".*SANDAL.*","SANDALE","",R.drawable.sandals_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(138,".*NAOČAL.*","NAOČALE","",R.drawable.glasses_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(139,".*SUNČ.* NAOČ.*","SUNČANE NAOČALE","",R.drawable.fashion_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(140,".*TEPIH.*","TEPIH","",R.drawable.carpet_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(141,".*ŽARULJ.*","ŽARULJA","",R.drawable.idea_min,"",R.drawable.white_background_min));
+        listOFAllProducts.add(new Products(142,".*KART.*","KARTE","",R.drawable.casino_min,"",R.drawable.white_background_min));
     }
 
         private void refreshViewList(){
-        final CustomListView  customListView = new CustomListView(MainActivity.this,specialProductsInList,idList);
+        final CustomListView  customListView = new CustomListView(MainActivity.this,specialProductsInList);
         listItems.setAdapter(customListView);
         customListView.notifyDataSetChanged();
-
-
     }
 
 
@@ -444,6 +483,7 @@ public class MainActivity extends AppCompatActivity {
         catch (Exception e){
 
             // todo PETAR NE KUZIM KAD SE IZVRSAVA OVAJ EXEPTION NIKAK DA GA HANDLA
+            //  zato sam dodao if uvjet   if (data !=null) udi je označeno sa */*/*
             Log.d("tryBlok: ","ne");
             Toast.makeText(this, "Nisam te čuo"+e.getMessage(), Toast.LENGTH_SHORT).show();
         }
@@ -455,17 +495,18 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode){
             case REQUEST_CODE_SPEECH_INPUT:{
 
+                // todo */*/*
                 if (data !=null) {
                 result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                if (resultCode == RESULT_OK && data != null) {
+                if (resultCode == RESULT_OK ) {
                     myWord = result.get(0).toUpperCase(); //my word je string
 
                     //Martin START filter
 
                     Filter filter = new Filter();
                     String[] convertedString = filter.stringToArray(myWord);
-                    String test = filter.readListReturnAdjectives(convertedString);
-                    testTextView.setText(test);
+                 //   String test = filter.readListReturnAdjectives(convertedString);
+                 //   testTextView.setText(test);
 
                     //Martin END
                     readList(myWord);
@@ -485,27 +526,39 @@ public class MainActivity extends AppCompatActivity {
         for (Products products : listOFAllProducts){
             if (myWord.contains(products.getFullNameOfProduct()) || myWord.matches(products.getRootProduct())){
                 //String potentialAdjective =
-                specialProductsInList.add(products);
+                setProductOnSpecificPositionInList(products,0,false);
             }
-            if (myWord.equals("OBRIŠI SVE")){
+            if (myWord.equals("OBRIŠI SVE") || myWord.equals("POBRIŠI SVE") || myWord.equals("IZBRIŠI SVE")){
                 specialProductsInList.clear();
 
             }
         }
 
-        SharedPreferences sharedPreferences = getSharedPreferences(KEY_TAG_1,Context.MODE_PRIVATE);
-        SharedPreferences.Editor prefsEditor = sharedPreferences.edit();
-        Gson gson = new Gson();
-
-        String jsonRemovedItems = gson.toJson(specialProductsInList);
-        String jsonAddDeletedItems = gson.toJson(specialProductsInList);
-        String jsonChekedItems = gson.toJson(specialProductsInList);
-        prefsEditor.putString("MyObject", jsonRemovedItems);
-        prefsEditor.putString("MyObject2", jsonAddDeletedItems);
-        prefsEditor.putString("MyObject5", jsonChekedItems);
-
-        prefsEditor.apply();
+        setSharedPrefernces();
         refreshViewList();
+    }
+
+    //todo - ovom metodo stavljas produkt na zeljno mjesto u listi
+
+    /**
+     * Metoda odlucuje na koju poziciju ce biti dodan item u listi.
+     * prvi uvjet - se koristi ako item zelimo pozicjonirat na pocetak liste,
+     * a moze se korisitit i za bilo koju drugu poziciju osim zadnje
+     * drugi uvjet - se koristi za pozicjoniranje na zadnje mjesto u listi
+     * (u drugom uvjetu se ne korisit pozicija (int positionInList)
+     * pa se moze stavit bilo koji br. npr.1025)
+     * @param products - objekt nad kojim se vrsi promjena
+     * @param positionInList - pozicija na koje se objekt postavlja
+     * @param endPosition - potvrda dali je pozicija zadnja ili ne
+     */
+    private void setProductOnSpecificPositionInList(Products products,int positionInList,boolean endPosition){
+        if (specialProductsInList.size()>0 && !endPosition){
+            specialProductsInList.add(positionInList,products);
+        }else if (endPosition){
+            specialProductsInList.add(products);
+        }else{
+            specialProductsInList.add(products);
+        }
     }
 
     @Override
