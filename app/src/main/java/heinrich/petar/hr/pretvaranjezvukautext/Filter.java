@@ -4,7 +4,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
-public class Filter  {
+public class Filter extends MainActivity {
 
     String test = "This is Filter Class";
     String[] rootsOnly=null;

@@ -9,14 +9,13 @@ public class Products {
     private String quantity;
     private Integer imageOfProduct;
     //todo new
-
     private String priceOfProduct;
     private Integer imageCheckedItem;
-
+    private String measure;
     //todo new -end
 
 
-    public Products(Integer id, String rootProduct, String fullNameOfProduct, String quantity, Integer imageOfProduct, String priceOfProduct, Integer imageCheckedItem) {
+    public Products(Integer id, String rootProduct, String fullNameOfProduct, String quantity, Integer imageOfProduct, String priceOfProduct, Integer imageCheckedItem,String measure) {
         this.id = id;
         this.rootProduct = rootProduct;
         this.fullNameOfProduct = fullNameOfProduct;
@@ -24,6 +23,7 @@ public class Products {
         this.imageOfProduct = imageOfProduct;
         this.priceOfProduct = priceOfProduct;
         this.imageCheckedItem = imageCheckedItem;
+        this.measure = measure;
     }
 
 
@@ -82,6 +82,13 @@ public class Products {
 
     public void setImageCheckedItem(Integer imageCheckedItem) {
         this.imageCheckedItem = imageCheckedItem;
+    }
+    public String getMeasure() {
+        return measure;
+    }
+
+    public void setMeasure(String measure) {
+        this.measure = measure;
     }
 
 

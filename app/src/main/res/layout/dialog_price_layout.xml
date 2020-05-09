@@ -23,71 +23,22 @@
             android:layout_marginEnd="105dp"
             android:gravity="center"
             android:text="NASLOV"
-            android:textColor="#DFD60D"
+            android:textColor="#7500FA"
             android:textSize="17dp"
             android:textStyle="bold|italic" />
 
 
     </RelativeLayout>
 
-    <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/tvLblSetPrice"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginStart="98dp"
-            android:layout_marginEnd="52dp"
-            android:paddingTop="5dp"
-            android:text="Postavi cijenu: "
-            android:textColor="#3EAA05"
-            android:textStyle="italic|bold"
-            android:textSize="20sp" />
 
-    </RelativeLayout>
-</LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <EditText
-                android:id="@+id/tvSetPriceLine"
-                android:layout_width="130dp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentEnd="true"
-                android:layout_marginStart="110dp"
-                android:layout_marginEnd="112dp"
-                android:cursorVisible="true"
-                android:inputType="numberDecimal"
-                android:paddingTop="5dp"
-                android:textColor="#EF0606"
-                android:textAlignment="center"
-                android:textSize="15sp"
-                android:textStyle="italic|bold" />
-
-        </RelativeLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingTop="5dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -128,6 +79,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
             android:orientation="horizontal">
 
             <TextView
@@ -195,20 +147,87 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:textAlignment="center"
-
             android:thumb="@drawable/thumb_image"
-
-
             />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/tvLblSetPrice"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="98dp"
+                    android:layout_marginEnd="52dp"
+                    android:paddingTop="5dp"
+                    android:text="Postavi cijenu: "
+                    android:textColor="#3EAA05"
+                    android:textStyle="italic|bold"
+                    android:textSize="20sp" />
+
+            </RelativeLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/tvSetPriceLine"
+                    android:layout_width="130dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="110dp"
+                    android:layout_marginEnd="112dp"
+                    android:cursorVisible="true"
+                    android:inputType="numberDecimal"
+                    android:paddingTop="5dp"
+                    android:textColor="#EF0606"
+                    android:textAlignment="center"
+                    android:textSize="15sp"
+                    android:textStyle="italic|bold" />
+
+                <TextView
+                    android:layout_width="25dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginTop="11dp"
+                    android:layout_marginEnd="84dp"
+                    android:layout_marginBottom="17dp"
+                    android:text="kn"
+                    android:textColor="#000" />
+
+            </RelativeLayout>
+        </LinearLayout>
+
+
+
+
 
         <Button
-            android:id="@+id/btnTest"
+            android:id="@+id/btnAcept"
             android:layout_width="120dp"
             android:layout_height="60dp"
             android:layout_gravity="center|bottom"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="13dp"
+            android:textColor="#FFCC09"
+            android:background="@drawable/btn_potvrda"
             android:text="potvrdi" />
-
 
     </LinearLayout>
 

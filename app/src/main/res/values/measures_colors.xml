@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="defaultColor">#000000</color>
+    <color name="selectedColor">#FF0000</color>
+    <color name="showMeasure">#536DFE</color>
+
+    <color name="btn_Potvrda">#EDBF10</color>
+
+
+</resources>

@@ -57,6 +57,7 @@ public class CustomListView extends ArrayAdapter<Products>  {
         viewHolder.tvw1.setText(products.getFullNameOfProduct());
         viewHolder.tvw2.setText(products.getQuantity());
         viewHolder.tvw3.setText(products.getPriceOfProduct());
+        viewHolder.tvw4.setText(products.getMeasure());
 
         Log.d(TAG3,"price of product "+  viewHolder.tvw3.getText().toString());
         return r;
@@ -68,6 +69,8 @@ public class CustomListView extends ArrayAdapter<Products>  {
         TextView tvw2;
 
         TextView tvw3;
+        TextView tvw4;
+
 
         ImageView ivw;
         ImageView ivw2;
@@ -79,6 +82,8 @@ public class CustomListView extends ArrayAdapter<Products>  {
 
 
             tvw3=v.findViewById(R.id.tvPrice);
+            tvw4=v.findViewById(R.id.tvBrotherQuantity);
+
 
             ivw=v.findViewById(R.id.imViewOfProduct);
             ivw2=v.findViewById(R.id.imViewCheck);
